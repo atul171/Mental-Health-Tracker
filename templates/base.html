@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindWell - Mental Health Support{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Mobile hamburger -->
+    <button id="sidebarToggle" class="toggle-btn" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+        <!-- Logo -->
+        <div class="sidebar-header">
+            <a href="{{ url_for('index') }}" class="sidebar-logo">
+                <i class="fas fa-brain"></i>
+                <span>MindWell</span>
+            </a>
+            <button class="sidebar-close-btn" id="closeSidebarBtn" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+
+            <p class="sidebar-section-label">MAIN MENU</p>
+
+            <a href="{{ url_for('index') }}" class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+
+            <a href="{{ url_for('assessment') }}" class="sidebar-link {% if request.endpoint == 'assessment' or request.endpoint == 'assessment_results' %}active{% endif %}">
+    <i class="fas fa-clipboard-list"></i>
+    <span>Assessment</span>
+</a>
+
+            <a href="{{ url_for('chat') }}" class="sidebar-link {% if request.endpoint == 'chat' %}active{% endif %}">
+                <i class="fas fa-comment-dots"></i>
+                <span>AI Chat</span>
+            </a>
+            <a href="{{ url_for('articles') }}" class="sidebar-link {% if request.endpoint == 'articles' %}active{% endif %}">
+                <i class="fas fa-newspaper"></i>
+                <span>Articles</span>
+            </a>
+            <a href="{{ url_for('meditation') }}" class="sidebar-link {% if request.endpoint == 'meditation' %}active{% endif %}">
+                <i class="fas fa-spa"></i>
+                <span>Meditation</span>
+            </a>
+
+            <a href="{{ url_for('contact') }}" class="sidebar-link {% if request.endpoint == 'contact' %}active{% endif %}">
+    <i class="fas fa-user-md"></i>
+    <span>Find a Counselor</span>
+</a>
+
+            <div class="sidebar-divider"></div>
+
+            <p class="sidebar-section-label">ACCOUNT</p>
+
+            {% if 'user_id' in session %}
+            <a href="{{ url_for('profile') }}" class="sidebar-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="sidebar-link sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="sidebar-link {% if request.endpoint == 'login' %}active{% endif %}">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Login</span>
+            </a>
+            <a href="{{ url_for('register') }}" class="sidebar-link {% if request.endpoint == 'register' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                <span>Register</span>
+            </a>
+            {% endif %}
+
+        </nav>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <i class="fas fa-heart"></i>
+        <span>&copy; {{ now.year }} MindWell &nbsp;·&nbsp; v2.1.2</span>        </div>
+
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+{% if session.get('is_admin') %}
+<div style="position: fixed; top: 6px; right: 24px; z-index: 9999;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-primary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar   = document.getElementById('sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const closeBtn  = document.getElementById('closeSidebarBtn');
+
+        function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+        function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
+        toggleBtn.addEventListener('click', open);
+        closeBtn.addEventListener('click',  close);
+        overlay.addEventListener('click',   close);
+
+        sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => { if (window.innerWidth < 993) close(); });
+        });
+    });
+    </script>
+
+</body>
+</html>

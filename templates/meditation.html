@@ -1,0 +1,744 @@
+{% extends 'base.html' %}
+
+{% block title %}Meditation - Mental Health Support{% endblock %}
+
+{% block extra_css %}
+<style>
+    .meditation-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+    
+    .meditation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .meditation-img {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .timer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
+    .timer-display {
+        font-size: 6rem;
+        font-weight: 300;
+        margin: 1rem 0;
+        font-family: monospace;
+    }
+    
+    .timer-controls {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .progress-ring-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+        position: absolute;
+    }
+    
+    .progress-ring-circle {
+        stroke-dasharray: 880;
+        stroke-dashoffset: 880;
+        transition: stroke-dashoffset 0.5s linear;
+    }
+    
+    .tab-content {
+        min-height: 400px;
+    }
+    
+    .breathing-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        position: relative;
+    }
+    
+    .breathing-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+        box-shadow: 0 0 30px rgba(79, 172, 254, 0.5);
+        transition: transform 4s ease-in-out, box-shadow 4s ease-in-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    .breathing-text {
+        position: absolute;
+        bottom: 20px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 300;
+        color: #333;
+        transition: opacity 0.5s ease;
+    }
+    
+    .inhale .breathing-circle {
+        transform: scale(1.5);
+        box-shadow: 0 0 50px rgba(79, 172, 254, 0.7);
+    }
+    
+    .hold .breathing-circle {
+        transform: scale(1.5);
+        box-shadow: 0 0 50px rgba(79, 172, 254, 0.7);
+    }
+    
+    .exhale .breathing-circle {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(79, 172, 254, 0.5);
+    }
+    
+    .preset-time {
+        width: 60px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .preset-time:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Sound wave animation */
+    .sound-wave {
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    
+    .sound-wave.active {
+        opacity: 1;
+    }
+    
+    .sound-bar {
+        display: inline-block;
+        width: 3px;
+        height: 100%;
+        background-color: #0d6efd;
+        border-radius: 2px;
+        animation: sound-wave-animation 1s ease-in-out infinite;
+    }
+    
+    .sound-bar:nth-child(2) { animation-delay: 0.1s; }
+    .sound-bar:nth-child(3) { animation-delay: 0.2s; }
+    .sound-bar:nth-child(4) { animation-delay: 0.3s; }
+    .sound-bar:nth-child(5) { animation-delay: 0.4s; }
+    
+    @keyframes sound-wave-animation {
+        0%, 100% { height: 5px; }
+        50% { height: 30px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 mb-2">Meditation & Mindfulness</h1>
+            <p class="lead text-muted">Find calm and clarity through guided meditation practices and breathing exercises.</p>
+        </div>
+    </div>
+    
+    <!-- Main Navigation Tabs -->
+    <ul class="nav nav-tabs nav-fill mb-4" id="meditationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="techniques-tab" data-bs-toggle="tab" data-bs-target="#techniques" type="button" role="tab" aria-controls="techniques" aria-selected="true">
+                <i class="fas fa-spa me-2"></i>Meditation Techniques
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="timer-tab" data-bs-toggle="tab" data-bs-target="#timer" type="button" role="tab" aria-controls="timer" aria-selected="false">
+                <i class="fas fa-clock me-2"></i>Meditation Timer
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="breathing-tab" data-bs-toggle="tab" data-bs-target="#breathing" type="button" role="tab" aria-controls="breathing" aria-selected="false">
+                <i class="fas fa-wind me-2"></i>Breathing Exercises
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="meditationTabsContent">
+        <!-- Meditation Techniques Tab -->
+        <div class="tab-pane fade show active" id="techniques" role="tabpanel" aria-labelledby="techniques-tab">
+            <div class="row">
+                <!-- Technique 1 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card meditation-card">
+                        <img src="https://images.unsplash.com/photo-1536623975707-c4b3b2af565d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top meditation-img" alt="Mindfulness Meditation">
+                        <div class="card-body">
+                            <h4 class="card-title">Mindfulness Meditation</h4>
+                            <p class="card-text">Focus on your breath and become aware of your thoughts without judgment. This practice helps reduce stress and improve focus.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">Beginner-Friendly</span>
+                                <span><i class="far fa-clock me-1"></i>5-30 min</span>
+                            </div>
+                            <hr>
+                            <button class="btn btn-primary w-100" data-bs-toggle="collapse" data-bs-target="#mindfulnessInstructions">
+                                <i class="fas fa-book-open me-2"></i>Instructions
+                            </button>
+                            <div class="collapse mt-3" id="mindfulnessInstructions">
+                                <div class="card card-body bg-light">
+                                    <h5>How to Practice</h5>
+                                    <ol>
+                                        <li>Find a quiet place to sit comfortably</li>
+                                        <li>Set a timer for your desired duration</li>
+                                        <li>Close your eyes and focus on your breath</li>
+                                        <li>Notice when your mind wanders and gently return to your breath</li>
+                                        <li>Continue this process until your timer ends</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technique 2 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card meditation-card">
+                        <img src="https://images.unsplash.com/photo-1517519014922-8fc06b814a0e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top meditation-img" alt="Loving-Kindness Meditation">
+                        <div class="card-body">
+                            <h4 class="card-title">Loving-Kindness Meditation</h4>
+                            <p class="card-text">Cultivate feelings of love and compassion towards yourself and others. Ideal for improving emotional wellbeing.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Emotional Healing</span>
+                                <span><i class="far fa-clock me-1"></i>10-20 min</span>
+                            </div>
+                            <hr>
+                            <button class="btn btn-primary w-100" data-bs-toggle="collapse" data-bs-target="#lovingKindnessInstructions">
+                                <i class="fas fa-book-open me-2"></i>Instructions
+                            </button>
+                            <div class="collapse mt-3" id="lovingKindnessInstructions">
+                                <div class="card card-body bg-light">
+                                    <h5>How to Practice</h5>
+                                    <ol>
+                                        <li>Sit comfortably and close your eyes</li>
+                                        <li>Begin by focusing on your breath</li>
+                                        <li>Silently repeat phrases like "May I be happy, may I be healthy, may I be safe"</li>
+                                        <li>Extend these wishes to loved ones, acquaintances, and all beings</li>
+                                        <li>Notice any resistance and return to the practice with kindness</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technique 3 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card meditation-card">
+                        <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top meditation-img" alt="Body Scan Meditation">
+                        <div class="card-body">
+                            <h4 class="card-title">Body Scan Meditation</h4>
+                            <p class="card-text">Gradually focus attention on each part of your body, noticing sensations without judgment. Excellent for stress reduction.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Stress Relief</span>
+                                <span><i class="far fa-clock me-1"></i>15-30 min</span>
+                            </div>
+                            <hr>
+                            <button class="btn btn-primary w-100" data-bs-toggle="collapse" data-bs-target="#bodyScanInstructions">
+                                <i class="fas fa-book-open me-2"></i>Instructions
+                            </button>
+                            <div class="collapse mt-3" id="bodyScanInstructions">
+                                <div class="card card-body bg-light">
+                                    <h5>How to Practice</h5>
+                                    <ol>
+                                        <li>Lie down or sit comfortably</li>
+                                        <li>Close your eyes and take several deep breaths</li>
+                                        <li>Bring awareness to your feet and notice any sensations</li>
+                                        <li>Slowly move attention upward through each part of your body</li>
+                                        <li>If your mind wanders, gently return to the body part you were focusing on</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meditation Timer Tab -->
+        <div class="tab-pane fade" id="timer" role="tabpanel" aria-labelledby="timer-tab">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="text-center mb-4">Meditation Timer</h3>
+                            
+                            <div class="timer-container">
+                                <div class="progress-ring-container">
+                                    <svg class="progress-ring" width="300" height="300">
+                                        <circle class="progress-ring-circle" stroke="#e9ecef" stroke-width="8" fill="transparent" r="140" cx="150" cy="150"></circle>
+                                        <circle class="progress-ring-circle progress-ring-circle-progress" stroke="#0d6efd" stroke-width="8" fill="transparent" r="140" cx="150" cy="150" id="progressCircle"></circle>
+                                    </svg>
+                                    <div class="timer-display" id="timerDisplay">00:00</div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-center mt-3 mb-4">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary preset-time" data-time="300">5m</button>
+                                        <button class="btn btn-outline-primary preset-time" data-time="600">10m</button>
+                                        <button class="btn btn-outline-primary preset-time" data-time="900">15m</button>
+                                        <button class="btn btn-outline-primary preset-time" data-time="1200">20m</button>
+                                        <button class="btn btn-outline-primary preset-time" data-time="1800">30m</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-2 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                            <input type="number" class="form-control" id="customMinutes" placeholder="Minutes" min="0" max="60">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-stopwatch"></i></span>
+                                            <input type="number" class="form-control" id="customSeconds" placeholder="Seconds" min="0" max="59">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check form-switch d-flex justify-content-center align-items-center mb-4">
+                                    <input class="form-check-input me-2" type="checkbox" id="ambientSoundToggle">
+                                    <label class="form-check-label" for="ambientSoundToggle">
+                                        Ambient Sound
+                                    </label>
+                                    <div class="sound-wave ms-2" id="soundWave">
+                                        <span class="sound-bar"></span>
+                                        <span class="sound-bar"></span>
+                                        <span class="sound-bar"></span>
+                                        <span class="sound-bar"></span>
+                                        <span class="sound-bar"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timer-controls">
+                                    <button class="btn btn-lg btn-primary" id="startTimer">
+                                        <i class="fas fa-play me-2"></i>Start
+                                    </button>
+                                    <button class="btn btn-lg btn-warning" id="pauseTimer" disabled>
+                                        <i class="fas fa-pause me-2"></i>Pause
+                                    </button>
+                                    <button class="btn btn-lg btn-danger" id="resetTimer" disabled>
+                                        <i class="fas fa-undo me-2"></i>Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Breathing Exercises Tab -->
+        <div class="tab-pane fade" id="breathing" role="tabpanel" aria-labelledby="breathing-tab">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h3 class="text-center mb-4">Breathing Exercises</h3>
+                            
+                            <!-- Breathing Technique Selector -->
+                            <div class="mb-4">
+                                <select class="form-select form-select-lg" id="breathingTechniqueSelect">
+                                    <option value="478">4-7-8 Breathing (Relaxation)</option>
+                                    <option value="box">Box Breathing (Stress Reduction)</option>
+                                    <option value="coherent">Coherent Breathing (Anxiety Relief)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Breathing Animation Container -->
+                            <div class="breathing-container" id="breathingContainer">
+                                <div class="breathing-circle" id="breathingCircle">
+                                    <span id="breathingInstruction">Get Ready</span>
+                                </div>
+                                <div class="breathing-text" id="breathingText">
+                                    Click Start to Begin
+                                </div>
+                            </div>
+                            
+                            <!-- Breathing Exercise Description -->
+                            <div class="card mt-4 mb-4 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title" id="breathingTitle">4-7-8 Breathing</h5>
+                                    <p class="card-text" id="breathingDescription">
+                                        This technique helps reduce anxiety and induces relaxation. Inhale for 4 seconds, hold for 7 seconds, and exhale for 8 seconds.
+                                    </p>
+                                    <ul id="breathingBenefits">
+                                        <li>Reduces stress and anxiety</li>
+                                        <li>Helps with falling asleep</li>
+                                        <li>Lowers heart rate and blood pressure</li>
+                                        <li>Improves focus and concentration</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Controls -->
+                            <div class="d-flex justify-content-center gap-3">
+                                <button class="btn btn-lg btn-primary" id="startBreathing">
+                                    <i class="fas fa-play me-2"></i>Start
+                                </button>
+                                <button class="btn btn-lg btn-danger" id="stopBreathing" disabled>
+                                    <i class="fas fa-stop me-2"></i>Stop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== Meditation Timer Functionality =====
+        const timerDisplay = document.getElementById('timerDisplay');
+        const progressCircle = document.getElementById('progressCircle');
+        const startTimerBtn = document.getElementById('startTimer');
+        const pauseTimerBtn = document.getElementById('pauseTimer');
+        const resetTimerBtn = document.getElementById('resetTimer');
+        const presetButtons = document.querySelectorAll('.preset-time');
+        const customMinutes = document.getElementById('customMinutes');
+        const customSeconds = document.getElementById('customSeconds');
+        const ambientSoundToggle = document.getElementById('ambientSoundToggle');
+        const soundWave = document.getElementById('soundWave');
+        
+        let timer;
+        let totalSeconds = 0;
+        let originalSeconds = 0;
+        let isRunning = false;
+        
+        // Circle progress variables
+        const circle = progressCircle;
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = circumference;
+        
+        // Set circle progress
+        function setProgress(percent) {
+            const offset = circumference - (percent * circumference);
+            circle.style.strokeDashoffset = offset;
+        }
+        
+        // Format time as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Update timer display
+        function updateDisplay(seconds) {
+            timerDisplay.textContent = formatTime(seconds);
+            if (originalSeconds > 0) {
+                const progress = (totalSeconds / originalSeconds);
+                setProgress(progress);
+            }
+        }
+        
+        // Start timer
+        function startTimer() {
+            if (!isRunning && totalSeconds > 0) {
+                isRunning = true;
+                originalSeconds = originalSeconds || totalSeconds;
+                
+                timer = setInterval(function() {
+                    totalSeconds--;
+                    updateDisplay(totalSeconds);
+                    
+                    if (totalSeconds <= 0) {
+                        clearInterval(timer);
+                        isRunning = false;
+                        totalSeconds = 0;
+                        
+                        // Play completion sound or notification
+                        new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play().catch(e => console.log('Audio playback error:', e));
+                        
+                        startTimerBtn.disabled = false;
+                        pauseTimerBtn.disabled = true;
+                        resetTimerBtn.disabled = false;
+                    }
+                }, 1000);
+                
+                startTimerBtn.disabled = true;
+                pauseTimerBtn.disabled = false;
+                resetTimerBtn.disabled = false;
+            }
+        }
+        
+        // Pause timer
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+                startTimerBtn.disabled = false;
+                pauseTimerBtn.disabled = true;
+            }
+        }
+        
+        // Reset timer
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            totalSeconds = 0;
+            originalSeconds = 0;
+            updateDisplay(totalSeconds);
+            setProgress(0);
+            
+            startTimerBtn.disabled = false;
+            pauseTimerBtn.disabled = true;
+            resetTimerBtn.disabled = true;
+        }
+        
+        // Set time based on user input
+        function setTime(seconds) {
+            if (!isRunning) {
+                totalSeconds = seconds;
+                originalSeconds = seconds;
+                updateDisplay(totalSeconds);
+                setProgress(1);
+                
+                startTimerBtn.disabled = false;
+                resetTimerBtn.disabled = false;
+            }
+        }
+        
+        // Event listeners for timer
+        startTimerBtn.addEventListener('click', startTimer);
+        pauseTimerBtn.addEventListener('click', pauseTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
+        
+        // Preset time buttons
+        presetButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const time = parseInt(this.dataset.time);
+                setTime(time);
+                
+                // Reset custom input fields
+                customMinutes.value = '';
+                customSeconds.value = '';
+            });
+        });
+        
+        // Custom time input
+        function updateCustomTime() {
+            const mins = parseInt(customMinutes.value) || 0;
+            const secs = parseInt(customSeconds.value) || 0;
+            const totalTime = (mins * 60) + secs;
+            
+            if (totalTime > 0) {
+                setTime(totalTime);
+            }
+        }
+        
+        customMinutes.addEventListener('change', updateCustomTime);
+        customSeconds.addEventListener('change', updateCustomTime);
+        
+        // Ambient sound toggle
+        ambientSoundToggle.addEventListener('change', function() {
+            if (this.checked) {
+                soundWave.classList.add('active');
+                // In a real app, you would play ambient sound here
+                console.log('Ambient sound on');
+            } else {
+                soundWave.classList.remove('active');
+                // In a real app, you would pause ambient sound here
+                console.log('Ambient sound off');
+            }
+        });
+        
+        // ===== Breathing Exercise Functionality =====
+        const breathingContainer = document.getElementById('breathingContainer');
+        const breathingCircle = document.getElementById('breathingCircle');
+        const breathingInstruction = document.getElementById('breathingInstruction');
+        const breathingText = document.getElementById('breathingText');
+        const breathingTechniqueSelect = document.getElementById('breathingTechniqueSelect');
+        const breathingTitle = document.getElementById('breathingTitle');
+        const breathingDescription = document.getElementById('breathingDescription');
+        const breathingBenefits = document.getElementById('breathingBenefits');
+        const startBreathingBtn = document.getElementById('startBreathing');
+        const stopBreathingBtn = document.getElementById('stopBreathing');
+        
+        let breathingInterval;
+        let breathingPhase = 'idle';
+        let isBreathingActive = false;
+        
+        // Breathing techniques configurations
+        const breathingTechniques = {
+            '478': {
+                title: '4-7-8 Breathing',
+                description: 'This technique helps reduce anxiety and induces relaxation. Inhale for 4 seconds, hold for 7 seconds, and exhale for 8 seconds.',
+                benefits: [
+                    'Reduces stress and anxiety',
+                    'Helps with falling asleep',
+                    'Lowers heart rate and blood pressure',
+                    'Improves focus and concentration'
+                ],
+                phases: [
+                    { name: 'inhale', duration: 4000, instruction: 'Inhale' },
+                    { name: 'hold', duration: 7000, instruction: 'Hold' },
+                    { name: 'exhale', duration: 8000, instruction: 'Exhale' }
+                ]
+            },
+            'box': {
+                title: 'Box Breathing',
+                description: 'A powerful stress-relief technique used by Navy SEALs. Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold again for 4 seconds.',
+                benefits: [
+                    'Regulates the autonomic nervous system',
+                    'Reduces stress in high-pressure situations',
+                    'Improves concentration and performance',
+                    'Can be done anywhere, anytime'
+                ],
+                phases: [
+                    { name: 'inhale', duration: 4000, instruction: 'Inhale' },
+                    { name: 'hold', duration: 4000, instruction: 'Hold' },
+                    { name: 'exhale', duration: 4000, instruction: 'Exhale' },
+                    { name: 'hold', duration: 4000, instruction: 'Hold' }
+                ]
+            },
+            'coherent': {
+                title: 'Coherent Breathing',
+                description: 'This technique involves breathing at a rate of 5 breaths per minute, which has been shown to balance the autonomic nervous system and reduce anxiety.',
+                benefits: [
+                    'Reduces anxiety and stress',
+                    'Increases heart rate variability',
+                    'Improves emotional regulation',
+                    'Enhances focus and cognitive function'
+                ],
+                phases: [
+                    { name: 'inhale', duration: 6000, instruction: 'Inhale Slowly' },
+                    { name: 'exhale', duration: 6000, instruction: 'Exhale Slowly' }
+                ]
+            }
+        };
+        
+        // Update breathing technique information
+        function updateBreathingInfo(technique) {
+            const info = breathingTechniques[technique];
+            breathingTitle.textContent = info.title;
+            breathingDescription.textContent = info.description;
+            
+            breathingBenefits.innerHTML = '';
+            info.benefits.forEach(benefit => {
+                const li = document.createElement('li');
+                li.textContent = benefit;
+                breathingBenefits.appendChild(li);
+            });
+        }
+        
+        // Start breathing exercise
+        function startBreathingExercise() {
+            if (isBreathingActive) return;
+            
+            isBreathingActive = true;
+            breathingContainer.classList.remove('inhale', 'hold', 'exhale');
+            
+            const selectedTechnique = breathingTechniqueSelect.value;
+            const technique = breathingTechniques[selectedTechnique];
+            let phaseIndex = 0;
+            
+            breathingText.textContent = 'Get ready...';
+            breathingInstruction.textContent = 'Get Ready';
+            
+            // Countdown before starting
+            setTimeout(() => {
+                runBreathingPhase();
+            }, 1000);
+            
+            function runBreathingPhase() {
+                if (!isBreathingActive) return;
+                
+                const phase = technique.phases[phaseIndex];
+                breathingContainer.className = 'breathing-container ' + phase.name;
+                breathingText.textContent = phase.instruction;
+                breathingInstruction.textContent = phase.instruction;
+                
+                setTimeout(() => {
+                    phaseIndex = (phaseIndex + 1) % technique.phases.length;
+                    runBreathingPhase();
+                }, phase.duration);
+            }
+            
+            startBreathingBtn.disabled = true;
+            stopBreathingBtn.disabled = false;
+        }
+        
+        // Stop breathing exercise
+        function stopBreathingExercise() {
+            isBreathingActive = false;
+            breathingContainer.classList.remove('inhale', 'hold', 'exhale');
+            breathingText.textContent = 'Click Start to Begin';
+            breathingInstruction.textContent = 'Get Ready';
+            
+            startBreathingBtn.disabled = false;
+            stopBreathingBtn.disabled = true;
+        }
+        
+        // Event listeners for breathing
+        startBreathingBtn.addEventListener('click', startBreathingExercise);
+        stopBreathingBtn.addEventListener('click', stopBreathingExercise);
+        
+        breathingTechniqueSelect.addEventListener('change', function() {
+            updateBreathingInfo(this.value);
+        });
+        
+        // Initialize with default technique
+        updateBreathingInfo('478');
+        
+        // Handle tab switching to reset timers/animations
+        const tabLinks = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabLinks.forEach(tabLink => {
+            tabLink.addEventListener('shown.bs.tab', function(event) {
+                // Reset timer when switching away from timer tab
+                if (event.relatedTarget && event.relatedTarget.id === 'timer-tab') {
+                    pauseTimer();
+                }
+                
+                // Reset breathing when switching away from breathing tab
+                if (event.relatedTarget && event.relatedTarget.id === 'breathing-tab') {
+                    stopBreathingExercise();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

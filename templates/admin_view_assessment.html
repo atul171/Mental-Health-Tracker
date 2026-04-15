@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Assessment Detail - MindWell Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1">Assessment Detail</h1>
+            <p class="text-muted mb-0">{{ assessment.user_email }}</p>
+        </div>
+        <a href="{{ url_for('admin_assessments') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Assessments
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left Column: Summary -->
+        <div class="col-md-4">
+
+            <!-- Score Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-4">
+                    {% set color_map = {'success': 'success', 'info': 'info', 'warning': 'warning', 'orange': 'warning', 'danger': 'danger'} %}
+                    {% set bar_color = {'success': '#198754', 'info': '#0dcaf0', 'warning': '#ffc107', 'orange': '#fd7e14', 'danger': '#dc3545'}.get(assessment.severity_color, '#6c757d') %}
+
+                    <div style="font-size:3rem; font-weight:700; color:{{ bar_color }};">
+                        {{ assessment.percent }}%
+                    </div>
+                    <div class="fw-semibold mb-2">{{ assessment.total_score }} / {{ assessment.max_score }} points</div>
+                    <div class="progress mb-3" style="height:10px; border-radius:5px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width:{{ assessment.percent }}%; background-color:{{ bar_color }};">
+                        </div>
+                    </div>
+                    <span class="badge bg-{{ color_map.get(assessment.severity_color, 'secondary') }} fs-6
+                                 {% if assessment.severity_color == 'orange' %}text-dark{% endif %}">
+                        {{ assessment.severity }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Meta Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header fw-semibold">Details</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">User</small>
+                        <span>{{ assessment.user_email }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Date</small>
+                        <span>{{ assessment.date.strftime('%B %d, %Y at %H:%M') if assessment.date else '—' }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Mood Described</small>
+                        <span class="fst-italic">"{{ assessment.mood }}"</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: AI Analysis + Answers -->
+        <div class="col-md-8">
+
+            <!-- AI Analysis -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header fw-semibold">
+                    <i class="fas fa-brain me-2 text-primary"></i>AI Analysis
+                </div>
+                <div class="card-body">
+                    {% if assessment.ai_analysis %}
+                        <p style="line-height:1.8; white-space:pre-wrap;">{{ assessment.ai_analysis }}</p>
+                    {% else %}
+                        <p class="text-muted">No analysis available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Question Answers -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header fw-semibold">
+                    <i class="fas fa-list-ul me-2 text-primary"></i>Question Responses
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for answer in assessment.answers %}
+                        <div class="list-group-item px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div style="flex:1;">
+                                    <div class="fw-semibold mb-1" style="font-size:.9rem;">
+                                        Q{{ loop.index }}. {{ answer.question }}
+                                    </div>
+                                    <div class="text-muted small">
+                                        Answer: <span class="fw-semibold text-dark">{{ answer.answer_label }}</span>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill ms-3
+                                    {% if answer.answer_value == 0 %}bg-success
+                                    {% elif answer.answer_value == 1 %}bg-info
+                                    {% elif answer.answer_value == 2 %}bg-warning text-dark
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ answer.answer_value }}/3
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

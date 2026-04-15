@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Mental Health Support{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-card {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        border: none;
+        border-radius: 16px;
+    }
+    .hero-card p { color: rgba(255,255,255,0.88); }
+
+    .inspiration-card {
+        background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+        border: none;
+        border-radius: 16px;
+    }
+
+    .feature-card {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        text-align: center;
+    }
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.1) !important;
+    }
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.6rem;
+    }
+    .feature-card .card-text {
+        color: #6c757d;
+        font-size: 0.92rem;
+    }
+    .feature-card .btn {
+        border-radius: 20px;
+        padding: 6px 22px;
+        font-size: 0.88rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card hero-card shadow p-2">
+            <div class="card-body py-4 px-4">
+                <h1 class="fw-bold mb-3" style="font-size:2.8rem;">Welcome to Mental Health Support</h1>
+                <p class="lead mb-1">Your journey to better mental wellbeing starts here.</p>
+                <p class="mb-4">We provide resources, tools, and community support to help you navigate your mental health journey.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('assessment') }}" class="btn btn-light btn-lg px-4 fw-semibold text-primary">
+                        <i class="fas fa-clipboard-list me-2"></i>Take the Mental Health Assessment
+                    </a>
+                    <a href="{{ url_for('chat') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-robot me-2"></i>Chat with AI Assistant
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 d-flex flex-column gap-3">
+        <div class="card inspiration-card shadow-sm flex-grow-1">
+    <div class="card-body py-4">
+                <h6 class="text-primary fw-bold mb-3">
+                    <i class="fas fa-quote-left me-2"></i>Daily Inspiration
+                </h6>
+<p class="fst-italic text-secondary mb-2">"You don't have to be positive all the time. It's perfectly okay to feel sad, angry, annoyed, frustrated, scared, or anxious. Having feelings doesn't make you a negative person. It makes you human."</p><p class="text-end text-muted small mb-0">— Lori Deschene</p>
+            </div>
+        </div>
+        {% if not session.get('user_id') %}
+        <div class="card shadow-sm border-0" style="border-radius:16px;">
+            <div class="card-body">
+                <h6 class="fw-bold mb-2">Join Our Community</h6>
+                <p class="text-muted small mb-3">Create an account to save your progress and get personalized recommendations.</p>
+                <a href="{{ url_for('register') }}" class="btn btn-success w-100">
+                    <i class="fas fa-user-plus me-2"></i>Register Now
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col">
+        <div class="card feature-card h-100 shadow-sm">
+            <div class="card-body py-4 px-3">
+                <div class="feature-icon bg-primary bg-opacity-10">
+                    <i class="fas fa-book text-primary"></i>
+                </div>
+                <h5 class="card-title fw-semibold">Educational Articles</h5>
+                <p class="card-text">Access our library of articles on various mental health topics written by experts.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 pb-4">
+                <a href="{{ url_for('articles') }}" class="btn btn-outline-primary">Browse Articles</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card feature-card h-100 shadow-sm">
+            <div class="card-body py-4 px-3">
+                <div class="feature-icon bg-success bg-opacity-10">
+                    <i class="fas fa-spa text-success"></i>
+                </div>
+                <h5 class="card-title fw-semibold">Meditation Guides</h5>
+                <p class="card-text">Explore guided meditations and mindfulness practices to reduce stress and anxiety.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 pb-4">
+                <a href="{{ url_for('meditation') }}" class="btn btn-outline-success">Start Meditating</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card feature-card h-100 shadow-sm">
+            <div class="card-body py-4 px-3">
+                <div class="feature-icon bg-warning bg-opacity-10">
+                    <i class="fas fa-phone text-warning"></i>
+                </div>
+                <h5 class="card-title fw-semibold">Professional Support</h5>
+                <p class="card-text">Connect with licensed counselors and therapists who can provide the help you need.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 pb-4">
+                <a href="{{ url_for('contact') }}" class="btn btn-outline-warning">Find Help</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

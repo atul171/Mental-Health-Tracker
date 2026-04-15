@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+
+{% block title %}Mental Health Assessment - Mental Health Support{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .quiz-card {
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    
+    .quiz-option {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .quiz-option:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .quiz-option.selected {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .mood-selector {
+        display: flex;
+        justify-content: space-between;
+        margin: 30px 0;
+    }
+    
+    .mood-icon {
+        text-align: center;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        width: 16%;
+    }
+    
+    .mood-icon:hover {
+        transform: scale(1.05);
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .mood-icon.selected {
+        background-color: #e6f7ff;
+        border: 2px solid #0d6efd;
+    }
+    
+    .mood-icon i {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .mood-icon.selected i {
+        transform: scale(1.2);
+    }
+    
+    .btn-quiz-nav {
+        min-width: 120px;
+    }
+    
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    
+    .progress-dot {
+        height: 10px;
+        width: 10px;
+        margin: 0 5px;
+        background-color: #dee2e6;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .progress-dot.active {
+        background-color: #0d6efd;
+        transform: scale(1.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-4 text-center">Mental Health Assessment</h1>
+                    <p class="text-center mb-4">This assessment will help us understand your current mental state and provide personalized recommendations.</p>
+                    
+                    <!-- Initial Mood Selection -->
+                    <div id="mood-section" class="mb-4">
+                        <h4 class="text-center mb-3">How are you feeling today?</h4>
+                        <div class="mood-selector">
+                            <div class="mood-icon" data-mood="happy">
+                                <i class="far fa-laugh text-success"></i>
+                                <div>Happy</div>
+                            </div>
+                            <div class="mood-icon" data-mood="calm">
+                                <i class="far fa-smile text-info"></i>
+                                <div>Calm</div>
+                            </div>
+                            <div class="mood-icon" data-mood="neutral">
+                                <i class="far fa-meh text-secondary"></i>
+                                <div>Neutral</div>
+                            </div>
+                            <div class="mood-icon" data-mood="stressed">
+                                <i class="far fa-frown text-warning"></i>
+                                <div>Stressed</div>
+                            </div>
+                            <div class="mood-icon" data-mood="sad">
+                                <i class="far fa-sad-tear text-primary"></i>
+                                <div>Sad</div>
+                            </div>
+                            <div class="mood-icon" data-mood="anxious">
+                                <i class="far fa-dizzy text-danger"></i>
+                                <div>Anxious</div>
+                            </div>
+                        </div>
+                        <form id="mood-form" class="text-center mt-4">
+                            <input type="hidden" id="selected_mood" name="selected_mood" value="neutral">
+                            <button type="submit" class="btn btn-primary btn-lg px-4" id="start-quiz">
+                                <i class="fas fa-play-circle me-2"></i>Begin Assessment
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Quiz Questions (Hidden initially) -->
+                    <div id="quiz-section" class="d-none">
+                        <!-- Progress dots -->
+                        <div class="progress-indicator mb-4" id="progress-dots"></div>
+                        
+                        <!-- Quiz container -->
+                        <div class="quiz-container">
+                            <div id="loading-quiz" class="text-center p-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Generating your personalized assessment questions...</p>
+                            </div>
+                            
+                            <div id="quiz-cards-container" class="d-none"></div>
+                            
+                            <!-- Navigation buttons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <button id="prev-question" class="btn btn-outline-primary btn-quiz-nav" disabled>
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button id="next-question" class="btn btn-primary btn-quiz-nav">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button id="submit-quiz" class="btn btn-success btn-quiz-nav d-none">
+                                    <i class="fas fa-check-circle me-2"></i>Submit
+                                </button>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="{{ url_for('skip_quiz') }}" class="text-muted small">Skip this assessment</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results (Hidden initially) -->
+                    <div id="results-section" class="d-none">
+                        <h4 class="text-center mb-4">Your Assessment Results</h4>
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status" id="results-loading">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div id="results-content" class="d-none"></div>
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Return to Homepage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const moodSection = document.getElementById('mood-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultsSection = document.getElementById('results-section');
+        const moodForm = document.getElementById('mood-form');
+        const moodIcons = document.querySelectorAll('.mood-icon');
+        const selectedMoodInput = document.getElementById('selected_mood');
+        const loadingQuiz = document.getElementById('loading-quiz');
+        const quizCardsContainer = document.getElementById('quiz-cards-container');
+        const progressDots = document.getElementById('progress-dots');
+        const prevButton = document.getElementById('prev-question');
+        const nextButton = document.getElementById('next-question');
+        const submitButton = document.getElementById('submit-quiz');
+        const resultsLoading = document.getElementById('results-loading');
+        const resultsContent = document.getElementById('results-content');
+        
+        let questions = [];
+        let currentQuestion = 0;
+        let userAnswers = {};
+        let selectedMood = 'neutral';
+        
+        // Handle mood selection
+        moodIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+                moodIcons.forEach(item => item.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMoodInput.value = this.dataset.mood;
+                selectedMood = this.dataset.mood;
+            });
+        });
+        
+        // Set default selected mood
+        document.querySelector('.mood-icon[data-mood="neutral"]').classList.add('selected');
+        
+        // Handle starting the quiz
+        moodForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            selectedMood = selectedMoodInput.value;
+            
+            // Hide mood section and show quiz section
+            moodSection.classList.add('d-none');
+            quizSection.classList.remove('d-none');
+            
+            // Fetch quiz questions
+            fetchQuizQuestions(selectedMood);
+        });
+        
+        // Fetch quiz questions from the server
+        function fetchQuizQuestions(mood) {
+            // Show loading indicator
+            loadingQuiz.classList.remove('d-none');
+            quizCardsContainer.classList.add('d-none');
+            
+            // Create form data for the request
+            const formData = new FormData();
+            formData.append('mood', mood);
+            
+            // Send request to generate quiz
+            fetch('/generate_quiz', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                loadingQuiz.classList.add('d-none');
+                quizCardsContainer.classList.remove('d-none');
+                
+                if (data.success && data.questions) {
+                    questions = data.questions;
+                    
+                    // Create progress dots
+                    createProgressDots(questions.length);
+                    
+                    // Render questions
+                    renderQuestions(questions);
+                    
+                    // Show first question
+                    showQuestion(0);
+                } else {
+                    // Handle error
+                    quizCardsContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${data.error || 'An error occurred while generating quiz questions. Please try again.'}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                // Hide loading indicator
+                loadingQuiz.classList.add('d-none');
+                quizCardsContainer.classList.remove('d-none');
+                
+                // Show error message
+                quizCardsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        An error occurred while connecting to the server. Please try again later.
+                    </div>
+                `;
+                console.error('Error:', error);
+            });
+        }
+        
+        // Create progress dots based on number of questions
+        function createProgressDots(count) {
+            progressDots.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                if (i === 0) dot.classList.add('active');
+                progressDots.appendChild(dot);
+            }
+        }
+        
+        // Render all questions
+        function renderQuestions(questions) {
+            quizCardsContainer.innerHTML = '';
+            
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card d-none';
+                card.dataset.questionIndex = index;
+                
+                let optionsHTML = '';
+                q.options.forEach((option, optIndex) => {
+                    optionsHTML += `
+                        <div class="quiz-option" data-value="${option}">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">${String.fromCharCode(65 + optIndex)}.</div>
+                                <div>${option}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                card.innerHTML = `
+                    <h4 class="quiz-question mb-4">Question ${index + 1}: ${q.question}</h4>
+                    <div class="quiz-options">
+                        ${optionsHTML}
+                    </div>
+                `;
+                
+                quizCardsContainer.appendChild(card);
+            });
+            
+            // Add event listeners to options
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const questionCard = this.closest('.quiz-card');
+                    const questionIndex = questionCard.dataset.questionIndex;
+                    
+                    // Remove selected class from all options in this card
+                    questionCard.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Save answer
+                    userAnswers[questions[questionIndex].question] = this.dataset.value;
+                });
+            });
+        }
+        
+        // Show a specific question
+        function showQuestion(index) {
+            document.querySelectorAll('.quiz-card').forEach((card, i) => {
+                if (i === index) {
+                    card.classList.remove('d-none');
+                } else {
+                    card.classList.add('d-none');
+                }
+            });
+            
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevButton.disabled = index === 0;
+            nextButton.classList.toggle('d-none', index === questions.length - 1);
+            submitButton.classList.toggle('d-none', index !== questions.length - 1);
+            
+            // Update current question
+            currentQuestion = index;
+        }
+        
+        // Navigation event listeners
+        prevButton.addEventListener('click', function() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        });
+        
+        nextButton.addEventListener('click', function() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        });
+        
+        // Submit quiz
+        submitButton.addEventListener('click', function() {
+            // Check if all questions are answered
+            const answeredQuestions = Object.keys(userAnswers).length;
+            if (answeredQuestions < questions.length) {
+                const confirmation = confirm(`You've only answered ${answeredQuestions} out of ${questions.length} questions. Are you sure you want to submit?`);
+                if (!confirmation) return;
+            }
+            
+            // Hide quiz section and show results section
+            quizSection.classList.add('d-none');
+            resultsSection.classList.remove('d-none');
+            
+            // Process results
+            processResults();
+        });
+        
+        // Process and display results
+        function processResults() {
+            // Show loading indicator
+            resultsLoading.classList.remove('d-none');
+            resultsContent.classList.add('d-none');
+            
+            // Convert user answers to form data format
+            const formData = new FormData();
+            
+            // Add questions and answers to the form
+            Object.keys(userAnswers).forEach((question, index) => {
+                formData.append(`question_${index}`, userAnswers[question]);
+            });
+            
+            // Add mood information
+            formData.append('mood', selectedMood);
+            formData.append('quiz_id', '1'); // Default quiz ID
+            
+            // Send results to server for processing
+            fetch('/process_quiz', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server response was not ok');
+                }
+                // Instead of parsing the HTML, we'll redirect to the results page
+                window.location.href = '/quiz_results';
+            })
+            .catch(error => {
+                // Hide loading indicator
+                resultsLoading.classList.add('d-none');
+                resultsContent.classList.remove('d-none');
+                
+                // Show error message
+                resultsContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        An error occurred while connecting to the server. Please try again later.
+                    </div>
+                `;
+                console.error('Error:', error);
+            });
+        }
+    });
+    </script>
+{% endblock %}

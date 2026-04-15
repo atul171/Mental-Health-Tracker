@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Chat Support - MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: 60vh;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: var(--card-border-radius);
+    }
+    .message {
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 15px;
+        max-width: 80%;
+        position: relative;
+    }
+    .user-message {
+        background-color: #007bff;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 0;
+    }
+    .bot-message {
+        background-color: #e9ecef;
+        color: #212529;
+        margin-right: auto;
+        border-bottom-left-radius: 0;
+    }
+    .typing-indicator {
+        display: inline-block;
+        padding: 5px 15px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+    }
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        float: left;
+        margin: 0 1px;
+        background-color: #9E9EA1;
+        display: block;
+        border-radius: 50%;
+        opacity: 0.4;
+    }
+    .typing-indicator span:nth-of-type(1) {
+        animation: 1s blink infinite 0.3333s;
+    }
+    .typing-indicator span:nth-of-type(2) {
+        animation: 1s blink infinite 0.6666s;
+    }
+    .typing-indicator span:nth-of-type(3) {
+        animation: 1s blink infinite 0.9999s;
+    }
+    @keyframes blink {
+        50% {
+            opacity: 1;
+        }
+    }
+    .welcome-message {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+    }
+    .message p {
+        margin-bottom: 5px;
+    }
+    .message ul, .message ol {
+        padding-left: 20px;
+    }
+    .back-button {
+        margin-right: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex align-items-center">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary back-button">
+            <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-robot me-2"></i>AI Support Chat</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="chat-container" id="chatContainer">
+                    <div class="welcome-message">
+    <i class="fas fa-robot mb-3" style="font-size: 3rem; color: #007bff;"></i>
+    <h5>MindWell AI Assistant</h5>
+
+    {% if assessment %}
+    <div class="alert alert-info text-start mt-3" style="font-size: 0.85rem;">
+        <i class="fas fa-brain me-1"></i>
+        <strong>Personalized for you</strong> — based on your last assessment 
+        (<strong>{{ assessment.mood }}</strong>, scored 
+        <strong>{{ assessment.percent }}%</strong>)
+        <br>
+        <small class="text-muted">
+            Taken on {{ assessment.date.strftime('%b %d, %Y') }}
+        </small>
+    </div>
+    {% else %}
+    <p>Hi there! I'm your mental health support assistant.</p>
+    <p class="small text-muted">
+        💡 Tip: Take an 
+        <a href="{{ url_for('assessment') }}">assessment first</a> 
+        so I can give you personalized support.
+    </p>
+    {% endif %}
+
+    <p class="small text-muted mt-2">
+        I'm not a replacement for professional mental health care. 
+        If you're in crisis, please contact emergency services.
+    </p>
+</div>
+                    <div id="messagesList"></div>
+                    <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="p-3 border-top">
+                    <form id="chat-form" class="d-flex">
+                        <input type="text" class="form-control me-2" id="user-message" placeholder="Type your message here..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+    <div class="d-flex justify-content-center align-items-center">
+        <small><i class="fas fa-shield-alt me-1"></i>Your conversations are private and secure</small>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chat-form');
+        const userMessageInput = document.getElementById('user-message');
+        const messagesList = document.getElementById('messagesList');
+        const chatContainer = document.getElementById('chatContainer');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Function to add a message to the chat
+        function addMessage(isUser, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser === 'user' ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = message;
+            messagesList.appendChild(messageDiv);
+            
+            // Scroll to the bottom of the chat
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Function to show the typing indicator
+        function showTyping() {
+            typingIndicator.style.display = 'inline-block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Function to hide the typing indicator
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+        function showQuotaBanner() {
+    if (document.getElementById('quota-banner')) return; // don't duplicate
+
+    const banner = document.createElement('div');
+    banner.id = 'quota-banner';
+    banner.innerHTML = `
+        <div style="
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        ">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+                <strong style="color: #856404;">AI Service Unavailable</strong>
+                <p style="margin: 4px 0 8px; color: #856404; font-size: 0.9rem;">
+                    Our AI has temporarily run out of credits. 
+                    Chat is unavailable right now — please try again later.
+                </p>
+                <a href="/contact" style="
+                    background: #856404;
+                    color: white;
+                    padding: 6px 14px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-size: 0.85rem;
+                ">💬 Talk to a Counselor Instead</a>
+            </div>
+        </div>
+    `;
+
+    messagesList.appendChild(banner);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // Also disable the input so user can't keep trying
+    userMessageInput.disabled = true;
+    userMessageInput.placeholder = 'AI service unavailable...';
+    chatForm.querySelector('button[type="submit"]').disabled = true;
+}
+function addCrisisMessage(message) {
+            const div = document.createElement('div');
+            div.style.cssText = `
+                background: #fff5f5;
+                border: 2px solid #dc3545;
+                border-radius: 12px;
+                padding: 16px 20px;
+                margin: 12px 0;
+            `;
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <span style="font-size:1.3rem;">🆘</span>
+                    <strong style="color:#dc3545; font-size:1rem;">
+                        Immediate Support Available
+                    </strong>
+                </div>
+                <div style="color:#212529; font-size:0.9rem;">${message}</div>
+            `;
+            messagesList.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        // Handle form submission
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = userMessageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage('user', message);
+            
+            // Clear input field
+            userMessageInput.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Send message to server
+            $.ajax({
+                type: 'POST',
+                url: '/send_message',
+                data: { message: message },
+                success: function(data) {
+    hideTyping();
+
+    if (data.quota_exhausted) {
+        showQuotaBanner();
+        return;
+    }
+
+    if (data.is_crisis) {
+        addCrisisMessage(data.response);
+        return;
+    }
+
+    if (data.error) {
+        addMessage('ai', '⚠️ Something went wrong. Please try again.');
+        return;
+    }
+
+    addMessage('ai', data.response);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+},
+
+error: function(xhr) {
+    hideTyping();
+    if (xhr.status === 503) {
+        showQuotaBanner();
+    } else {
+        addMessage('ai', '⚠️ Could not reach the server. Check your connection.');
+    }
+    console.error('Error:', xhr);
+}
+            });
+        });
+    });
+</script>
+{% endblock %} 

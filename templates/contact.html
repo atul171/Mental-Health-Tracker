@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact - MindWell{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">Contact Professional Support</h1>
+        <p class="lead">Connect with licensed mental health professionals or submit your information to receive assistance.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Counselors List -->
+    <div class="col-lg-7 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-users me-2"></i>Available Counselors</h4>
+            </div>
+            <div class="card-body">
+                {% if counselors %}
+                <div class="row">
+                    {% for counselor in counselors %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-primary text-white me-3">
+                                        <span>{{ counselor.name[0] }}</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0">{{ counselor.name }}</h5>
+                                        <p class="card-subtitle text-muted">{{ counselor.specialization }}</p>
+                                    </div>
+                                </div>
+                                <p class="card-text">{{ counselor.bio }}</p>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-envelope me-2 text-primary"></i>{{ counselor.email }}</li>
+                                    <li><i class="fas fa-phone me-2 text-primary"></i>{{ counselor.phone }}</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#scheduleModal" data-counselor="{{ counselor.name }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>Schedule Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No counselors are currently available. Please fill out the contact form and someone will reach out to you.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Contact Us</h4>
+            </div>
+            <div class="card-body">
+                <form id="contactForm" action="{{ url_for('contact_submit') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
+                        <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="concern" class="form-label">Primary Concern</label>
+                        <select class="form-select" id="concern" name="concern" required>
+                            <option value="" selected disabled>Select your primary concern</option>
+                            <option value="Anxiety">Anxiety</option>
+                            <option value="Depression">Depression</option>
+                            <option value="Stress">Stress Management</option>
+                            <option value="Relationship">Relationship Issues</option>
+                            <option value="Self-esteem">Self-esteem</option>
+                            <option value="Trauma">Trauma/PTSD</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your primary concern.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" placeholder="Briefly describe your situation and how we can help" required></textarea>
+                        <div class="invalid-feedback">Please enter a message.</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="privacyAgreement" name="privacy_agreement" required>
+                        <label class="form-check-label" for="privacyAgreement">I agree to the privacy policy and consent to being contacted</label>
+                        <div class="invalid-feedback">You must agree to the privacy policy.</div>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Additional Resources Card -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Crisis Resources</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">If you're experiencing a mental health emergency, please use these resources for immediate help:</p>
+                <ul class="list-group list-group-flush">
+    <li class="list-group-item"><i class="fas fa-phone-alt me-2 text-danger"></i>iCall (TISS): <strong>9152987821</strong></li>
+    <li class="list-group-item"><i class="fas fa-phone-alt me-2 text-danger"></i>Vandrevala Foundation: <strong>1860-2662-345</strong> (24/7)</li>
+    <li class="list-group-item"><i class="fas fa-phone-alt me-2 text-danger"></i>Snehi NGO: <strong>044-24640050</strong></li>
+    <li class="list-group-item"><i class="fas fa-phone-alt me-2 text-danger"></i>iMind (NIMHANS): <strong>080-46110007</strong></li>
+    <li class="list-group-item"><i class="fas fa-hospital me-2 text-danger"></i>Emergency Services: <strong>112</strong></li>
+    <li class="list-group-item"><i class="fas fa-comment-dots me-2 text-primary"></i>Fortis Stress Helpline: <strong>8376804102</strong></li>
+</ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i>Schedule Appointment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="counselorName" name="counselor_name">
+                    <div class="mb-3">
+                        <label for="appointmentName" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="appointmentName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentEmail" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="appointmentEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentDate" class="form-label">Preferred Date</label>
+                        <input type="date" class="form-control" id="appointmentDate" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentTime" class="form-label">Preferred Time</label>
+                        <select class="form-select" id="appointmentTime" name="time" required>
+                            <option value="" selected disabled>Select a time</option>
+                            <option value="Morning">Morning (9AM - 12PM)</option>
+                            <option value="Afternoon">Afternoon (12PM - 5PM)</option>
+                            <option value="Evening">Evening (5PM - 8PM)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentNotes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="appointmentNotes" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitAppointment">
+                    <i class="fas fa-paper-plane me-2"></i>Request Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                this.classList.add('was-validated');
+            });
+        }
+        
+        // Appointment modal
+        const scheduleModal = document.getElementById('scheduleModal');
+        if (scheduleModal) {
+            scheduleModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const counselorName = button.getAttribute('data-counselor');
+                const modalTitle = this.querySelector('.modal-title');
+                const counselorNameInput = document.getElementById('counselorName');
+                
+                modalTitle.textContent = `Schedule with ${counselorName}`;
+                counselorNameInput.value = counselorName;
+            });
+            
+            const appointmentForm = document.getElementById('appointmentForm');
+            const submitButton = document.getElementById('submitAppointment');
+            
+            submitButton.addEventListener('click', function() {
+                if (!appointmentForm.checkValidity()) {
+                    appointmentForm.classList.add('was-validated');
+                    return;
+                }
+                
+                // Here you would typically send the form data to the server
+                // For now, we'll just show a success message and close the modal
+                const modal = bootstrap.Modal.getInstance(scheduleModal);
+                modal.hide();
+                
+                // Create a toast or alert to show success message
+                alert('Your appointment request has been submitted. We will contact you to confirm.');
+            });
+        }
+        
+        // Set min date for appointment datepicker to today
+        const appointmentDate = document.getElementById('appointmentDate');
+        if (appointmentDate) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            appointmentDate.min = `${yyyy}-${mm}-${dd}`;
+        }
+    });
+</script>
+{% endblock %}

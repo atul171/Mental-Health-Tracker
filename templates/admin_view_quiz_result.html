@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}View Quiz Result - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">View Quiz Result Details</h1>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quiz Result Information</h5>
+                    <p><strong>User Email:</strong> {{ quiz_result.get('user_email', 'N/A') }}</p>
+                    <p><strong>Quiz ID:</strong> {{ quiz_result.get('quiz_id', 'N/A') }}</p>
+                    <p><strong>Score:</strong> {{ quiz_result.get('score', 'N/A') }}</p>
+                    <p><strong>Date Completed:</strong> {{ quiz_result.get('date_completed', 'N/A').strftime('%Y-%m-%d %H:%M') if quiz_result.get('date_completed') else 'N/A' }}</p>
+
+                    <h5 class="card-title mt-4">Answers</h5>
+                    {% if quiz_result.get('answers') %}
+                        <ul>
+                        {% for question_id, answer in quiz_result.get('answers').items() %}
+                            <li><strong>Question {{ question_id }}:</strong> {{ answer }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No answers recorded for this quiz result.</p>
+                    {% endif %}
+
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

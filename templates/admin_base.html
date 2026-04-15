@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindWell Admin{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Mobile hamburger -->
+    <button id="sidebarToggle" class="toggle-btn" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+        <!-- Logo -->
+        <div class="sidebar-header">
+            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-logo">
+                <i class="fas fa-brain"></i>
+                <span>MindWell</span>
+            </a>
+            <button class="sidebar-close-btn" id="closeSidebarBtn" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+
+            <p class="sidebar-section-label">ADMIN MENU</p>
+
+            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('index') }}" class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+    <i class="fas fa-clipboard-list"></i>
+    <span>Assessment</span>
+</a>
+
+            <div class="sidebar-divider"></div>
+
+            <p class="sidebar-section-label">ACCOUNT</p>
+
+            <a href="{{ url_for('logout') }}" class="sidebar-link sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+
+        </nav>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <i class="fas fa-heart"></i>
+            <span>&copy; {{ now.year }} MindWell &nbsp;·&nbsp; Admin</span>
+        </div>
+
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar   = document.getElementById('sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const closeBtn  = document.getElementById('closeSidebarBtn');
+
+        function open()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+        function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
+        toggleBtn.addEventListener('click', open);
+        closeBtn.addEventListener('click',  close);
+        overlay.addEventListener('click',   close);
+
+        sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => { if (window.innerWidth < 993) close(); });
+        });
+    });
+    </script>
+
+</body>
+</html>

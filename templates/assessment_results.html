@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Your Results - MindWell{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:800px">
+
+    <h2 class="fw-bold mb-1">
+        <i class="fas fa-chart-bar text-primary me-2"></i>Your Assessment Results
+    </h2>
+    <p class="text-muted mb-4">AI-powered analysis based on your responses.</p>
+
+    <!-- Score Card -->
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-body text-center p-4">
+            <h5 class="text-muted mb-1">You described feeling:</h5>
+            <p class="fst-italic mb-3">"{{ data.mood }}"</p>
+
+            <div class="display-4 fw-bold text-primary mb-1">
+                {{ data.total_score }} / {{ data.max_score }}
+            </div>
+            <p class="text-muted">Overall Score ({{ data.percent }}%)</p>
+
+            <!-- Score bar -->
+            <div class="progress" style="height:20px">
+                {% if data.percent <= 25 %}
+                    {% set bar_color = "success" %}
+                {% elif data.percent <= 50 %}
+                    {% set bar_color = "info" %}
+                {% elif data.percent <= 75 %}
+                    {% set bar_color = "warning" %}
+                {% else %}
+                    {% set bar_color = "danger" %}
+                {% endif %}
+                <div class="progress-bar bg-{{ bar_color }}"
+                     style="width: {{ data.percent }}%">
+                    {{ data.percent }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white fw-semibold">
+            <i class="fas fa-robot me-2"></i>AI Analysis & Recommendations
+        </div>
+        <div class="card-body">
+            <div class="ai-analysis">
+                {{ data.analysis_html | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Answer Breakdown -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            <i class="fas fa-list me-2"></i>Your Response Breakdown
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Question</th>
+                            <th class="text-center">Your Answer</th>
+                            <th class="text-center">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in data.answers %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ a.question }}</td>
+                            <td class="text-center">{{ a.answer_label }}</td>
+                            <td class="text-center fw-bold
+                                {% if a.answer_value == 0 %}text-success
+                                {% elif a.answer_value == 1 %}text-info
+                                {% elif a.answer_value == 2 %}text-warning
+                                {% else %}text-danger{% endif %}">
+                                {{ a.answer_value }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                            <td class="text-center fw-bold">{{ data.total_score }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="alert alert-secondary">
+        <i class="fas fa-info-circle me-1"></i>
+        <strong>Disclaimer:</strong> This AI-generated analysis is a screening tool only and does
+        not constitute a clinical diagnosis. If you are in distress, please contact a licensed
+        mental health professional or crisis helpline immediately.
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="/assessment" class="btn btn-outline-primary">
+            <i class="fas fa-redo me-1"></i>Retake Assessment
+        </a>
+        <a href="/chat" class="btn btn-outline-success">
+            <i class="fas fa-robot me-1"></i>Talk to AI Assistant
+        </a>
+        <a href="{{ url_for('contact') }}" class="sidebar-link {% if request.endpoint == 'contact' %}active{% endif %}">
+            <i class="fas fa-user-md"></i>
+        <span>Find a Counselor</span>
+         </a>
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-home me-1"></i>Back to Home
+        </a>
+    </div>
+
+</div>
+
+<style>
+.ai-analysis p { margin-bottom: 1rem; line-height: 1.7; }
+</style>
+{% endblock %}

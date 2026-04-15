@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Quizzes - MindWell{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">Mental Health Assessments</h1>
+        <p class="lead">Explore our various assessments to gain insights into different aspects of your mental wellbeing.</p>
+    </div>
+</div>
+
+<!-- Featured Quiz - Main Assessment -->
+<div class="card shadow mb-4">
+    <div class="row g-0">
+        <div class="col-md-8">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2">Featured</span>
+                    <h2 class="card-title">Comprehensive Wellness Assessment</h2>
+                </div>
+                <p class="card-text">Our primary assessment tailored to your current mood and situation. Get personalized insights and recommendations to improve your mental wellbeing.</p>
+                <ul class="list-unstyled mb-4">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Personalized questions based on your current mood</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>AI-generated analysis of your responses</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Actionable recommendations to improve wellbeing</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Track your progress over time</li>
+                </ul>
+                <a href="{{ url_for('assessment') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                    <i class="fas fa-clipboard-check me-2"></i>Take Assessment
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 d-none d-md-block">
+            <div class="h-100 bg-light d-flex align-items-center justify-content-center p-4">
+                <i class="fas fa-brain text-primary" style="font-size: 8rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Custom Quiz Section -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white py-3">
+        <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Generate Custom Quiz</h3>
+    </div>
+    <div class="card-body">
+        <p>Create a personalized quiz on any mental health topic that interests you. Our AI will generate relevant questions to help you learn and reflect.</p>
+        
+        <form id="customQuizForm" action="{{ url_for('generate_custom_quiz') }}" method="POST" class="needs-validation" novalidate>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="quizTopic" class="form-label">Quiz Topic</label>
+                    <select class="form-select" id="quizTopic" name="topic" required>
+                        <option value="" selected disabled>Select a topic</option>
+                        <option value="anxiety">Anxiety</option>
+                        <option value="depression">Depression</option>
+                        <option value="stress">Stress Management</option>
+                        <option value="mindfulness">Mindfulness</option>
+                        <option value="sleep">Sleep Hygiene</option>
+                        <option value="relationships">Relationships</option>
+                        <option value="self_esteem">Self-Esteem</option>
+                        <option value="emotional_intelligence">Emotional Intelligence</option>
+                        <option value="trauma">Trauma & Recovery</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a topic.</div>
+                </div>
+                <div class="col-md-3">
+                    <label for="quizQuestions" class="form-label">Number of Questions</label>
+                    <select class="form-select" id="quizQuestions" name="num_questions">
+                        <option value="5">5 Questions</option>
+                        <option value="10" selected>10 Questions</option>
+                        <option value="15">15 Questions</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="quizDifficulty" class="form-label">Level</label>
+                    <select class="form-select" id="quizDifficulty" name="difficulty">
+                        <option value="basic">Basic</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <label for="customPrompt" class="form-label">Specific Focus (Optional)</label>
+                <textarea class="form-control" id="customPrompt" name="custom_prompt" rows="2" placeholder="e.g., 'I'd like to focus on anxiety in social situations' or 'Help me understand emotional triggers'"></textarea>
+            </div>
+            
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-magic me-2"></i>Generate Custom Quiz
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Standardized Assessments -->
+
+<!-- Standardized Assessment Modal -->
+<div class="modal fade" id="standardizedQuizModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-clipboard-list me-2"></i>Assessment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>This standardized assessment is for educational purposes only and is not a substitute for professional diagnosis or treatment.
+                </div>
+                <div id="quizContent">
+                    <p>Loading assessment questions...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitAssessment" disabled>
+                    <i class="fas fa-paper-plane me-2"></i>Submit Answers
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const customQuizForm = document.getElementById('customQuizForm');
+        if (customQuizForm) {
+            customQuizForm.addEventListener('submit', function(event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                this.classList.add('was-validated');
+            });
+        }
+        
+        // Standardized quiz modal
+        const standardizedQuizModal = document.getElementById('standardizedQuizModal');
+        if (standardizedQuizModal) {
+            standardizedQuizModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const quizType = button.getAttribute('data-quiz');
+                const modalTitle = this.querySelector('.modal-title');
+                const quizContent = document.getElementById('quizContent');
+                const submitButton = document.getElementById('submitAssessment');
+                
+                // Set title based on quiz type
+                switch(quizType) {
+                    case 'phq9':
+                        modalTitle.innerHTML = '<i class="fas fa-clipboard-list me-2"></i>Depression Screening (PHQ-9)';
+                        break;
+                    case 'gad7':
+                        modalTitle.innerHTML = '<i class="fas fa-clipboard-list me-2"></i>Anxiety Assessment (GAD-7)';
+                        break;
+                    case 'pss':
+                        modalTitle.innerHTML = '<i class="fas fa-clipboard-list me-2"></i>Stress Assessment (PSS)';
+                        break;
+                    default:
+                        modalTitle.innerHTML = '<i class="fas fa-clipboard-list me-2"></i>Assessment';
+                }
+                
+                // In a real application, you would load the questions from the server
+                // For now, we'll show a placeholder message
+                quizContent.innerHTML = `<p>This would load the ${quizType.toUpperCase()} assessment questions from the server.</p>
+                                        <p>In a real implementation, you would see the standardized questions here and be able to answer them.</p>`;
+                
+                // Enable submit button
+                submitButton.disabled = false;
+            });
+            
+            // Handle assessment submission
+            const submitButton = document.getElementById('submitAssessment');
+            submitButton.addEventListener('click', function() {
+                // In a real application, you would process the answers and show results
+                // For now, we'll just close the modal and show a message
+                const modal = bootstrap.Modal.getInstance(standardizedQuizModal);
+                modal.hide();
+                
+                alert('Thank you for completing the assessment. In a real application, you would see your results here.');
+            });
+        }
+    });
+</script>
+{% endblock %}

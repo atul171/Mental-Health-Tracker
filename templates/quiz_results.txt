@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Results - MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .results-summary {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .recommendations .list-group-item {
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .recommendations .list-group-item:hover {
+        transform: translateX(5px);
+    }
+    
+    .recommendations .list-group-item:nth-child(1) {
+        border-left-color: var(--bs-primary);
+    }
+    
+    .recommendations .list-group-item:nth-child(2) {
+        border-left-color: var(--bs-success);
+    }
+    
+    .recommendations .list-group-item:nth-child(3) {
+        border-left-color: var(--bs-info);
+    }
+    
+    .result-highlight {
+        font-weight: 500;
+        font-size: 1.1rem;
+        color: var(--bs-primary);
+    }
+    
+    .disclaimer {
+        background-color: #e3f2fd;
+        border-left: 4px solid #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h2 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Assessment Results</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="display-1 text-primary mb-3">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h3 class="mb-3">Thank you for completing this assessment!</h3>
+                        <p class="lead">Your responses have been recorded and will help us provide better insights for your mental wellness journey.</p>
+                        
+                        <div class="alert disclaimer mt-4" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Remember that these assessments are not diagnostic tools. If you're experiencing persistent 
+                            mental health concerns, please consult with a healthcare professional.
+                        </div>
+                    </div>
+                    
+                    <div class="results-section mb-5">
+                        <h4 class="border-bottom pb-2 mb-4"><i class="fas fa-chart-line me-2"></i>Your Results Summary</h4>
+                        <div class="results-summary">
+                            <p class="result-highlight">{{ results }}</p>
+                        </div>
+                        
+                        <!-- Display personalized recommendations based on results -->
+                        <div class="recommendations mt-5">
+                            <h4 class="border-bottom pb-2 mb-4"><i class="fas fa-lightbulb me-2"></i>Personalized Recommendations</h4>
+                            <div class="list-group">
+                                {% for recommendation in recommendations %}
+                                <div class="list-group-item list-group-item-action d-flex gap-3 py-3">
+                                    <div class="icon-circle {% if loop.index == 1 %}bg-primary{% elif loop.index == 2 %}bg-success{% else %}bg-info{% endif %} text-white">
+                                        <i class="fas {% if loop.index == 1 %}fa-heart{% elif loop.index == 2 %}fa-running{% else %}fa-brain{% endif %}"></i>
+                                    </div>
+                                    <div class="d-flex gap-2 w-100 justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">{{ recommendation.title }}</h6>
+                                            <p class="mb-0 opacity-75">{{ recommendation.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-5 pt-3 border-top">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{{ url_for('other_quizzes') }}" class="btn btn-outline-primary me-md-2">
+                                <i class="fas fa-clipboard-list me-2"></i>Take Another Assessment
+                            </a>
+                            <a href="{{ url_for('meditation') }}" class="btn btn-primary">
+                                <i class="fas fa-spa me-2"></i>Try Meditation
+                            </a>
+                        </div>
+                        
+                        {% if not session.get('user_id') %}
+                        <div class="mt-4">
+                            <p class="text-muted">Create an account to save your results and track your progress over time.</p>
+                            <a href="{{ url_for('register') }}" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Assessment Monitor - MindWell Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1">Assessment Monitor</h1>
+            <p class="text-muted mb-0">View and monitor all user assessments</p>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center py-3">
+                <h3 class="fw-bold text-primary mb-1">{{ assessments | length }}</h3>
+                <p class="text-muted mb-0 small">Total Assessments</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center py-3">
+                <h3 class="fw-bold text-danger mb-1">
+                    {% set high = [] %}
+                    {% for a in assessments %}
+                        {% if a.severity in ['Severe', 'Moderately Severe'] %}
+                            {% set _ = high.append(a) %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ high | length }}
+                </h3>
+                <p class="text-muted mb-0 small">High Severity</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center py-3">
+                <h3 class="fw-bold text-warning mb-1">
+                    {% set mid = [] %}
+                    {% for a in assessments %}
+                        {% if a.severity == 'Moderate' %}
+                            {% set _ = mid.append(a) %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ mid | length }}
+                </h3>
+                <p class="text-muted mb-0 small">Moderate</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center py-3">
+                <h3 class="fw-bold text-success mb-1">
+                    {% set low = [] %}
+                    {% for a in assessments %}
+                        {% if a.severity in ['Minimal', 'Mild'] %}
+                            {% set _ = low.append(a) %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ low | length }}
+                </h3>
+                <p class="text-muted mb-0 small">Low Severity</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            {% if assessments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">User</th>
+                            <th>Mood</th>
+                            <th class="text-center">Score</th>
+                            <th class="text-center">Severity</th>
+                            <th>Date</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in assessments %}
+                        <tr>
+                            <td class="ps-4">{{ a.user.email if a.user else 'Unknown' }}</td>
+                            <td>{{ a.mood | truncate(35) }}</td>
+                            <td class="text-center">{{ a.total_score }} / {{ a.max_score }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-{{ a.severity_color if a.severity_color != 'orange' else 'warning' }}">
+                                    {{ a.severity }}
+                                </span>
+                            </td>
+                            <td>{{ a.date.strftime('%b %d, %Y') if a.date else '—' }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('admin_view_assessment', assessment_id=a._id) }}"
+                                   class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <p class="fw-semibold mb-1">No assessments yet</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

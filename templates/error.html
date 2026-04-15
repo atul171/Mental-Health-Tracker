@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - MindWell{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-exclamation-triangle text-danger display-1 mb-4"></i>
+                    <h1 class="mb-4">{{ title }}</h1>
+                    <p class="lead mb-4">{{ message }}</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4 me-sm-3">
+                            <i class="fas fa-home me-2"></i>Go to Home
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

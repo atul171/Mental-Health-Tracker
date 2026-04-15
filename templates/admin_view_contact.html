@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}View Contact Request - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">View Contact Request Details</h1>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Contact Request Information</h5>
+                    <p><strong>Name:</strong> {{ contact.get('name', 'N/A') }}</p>
+                    <p><strong>Email:</strong> {{ contact.get('email', 'N/A') }}</p>
+                    <p><strong>Phone:</strong> {{ contact.get('phone', 'N/A') }}</p>
+                    <p><strong>Concern:</strong> {{ contact.get('concern', 'N/A') }}</p>
+                    <p><strong>Message:</strong> {{ contact.get('message', 'N/A') }}</p>
+                    <p><strong>Date Submitted:</strong> {{ contact.get('date_submitted', 'N/A').strftime('%Y-%m-%d %H:%M') if contact.get('date_submitted') else 'N/A' }}</p>
+                    <p><strong>Status:</strong> {{ contact.get('status', 'N/A') }}</p>
+
+                    <h5 class="card-title mt-4">Update Status</h5>
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label">Change Status:</label>
+                        <select class="form-select" id="statusSelect">
+                            <option value="new" {% if contact.get('status') == 'new' %}selected{% endif %}>New</option>
+                            <option value="in_progress" {% if contact.get('status') == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="resolved" {% if contact.get('status') == 'resolved' %}selected{% endif %}>Resolved</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateContactStatus('{{ contact._id }}')">Update Status</button>
+
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateContactStatus(contactId) {
+        const newStatus = document.getElementById('statusSelect').value;
+        fetch(`/admin/update_contact_status/${contactId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Status updated successfully!');
+                location.reload(); // Reload to show updated status
+            } else {
+                alert('Error updating status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating status.');
+        });
+    }
+</script>
+{% endblock %}

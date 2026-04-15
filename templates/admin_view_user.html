@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}View User - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">View User Details</h1>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">User Information</h5>
+                    <p><strong>Email:</strong> {{ user.get('email', 'N/A') }}</p>
+                    <p><strong>Name:</strong> {{ user.get('first_name', '') }} {{ user.get('last_name', '') }}</p>
+                    <p><strong>Joined:</strong> {{ user.get('created_at', 'N/A').strftime('%Y-%m-%d %H:%M') if user.get('created_at') else 'N/A' }}</p>
+                    <p><strong>Last Login:</strong> {{ user.get('last_login', 'N/A').strftime('%Y-%m-%d %H:%M') if user.get('last_login') else 'Never' }}</p>
+                    <p><strong>Assessments Completed:</strong> {{ user.get('assessments_completed', 0) }}</p>
+                    <p><strong>Chat Sessions:</strong> {{ user.get('chat_sessions', 0) }}</p>
+                    <p><strong>Meditation Minutes:</strong> {{ user.get('meditation_minutes', 0) }}</p>
+                    
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Custom Quiz: {{ topic }} - MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .quiz-card {
+        transition: transform 0.4s ease, opacity 0.4s ease;
+        display: none;
+    }
+    
+    .quiz-card.active {
+        display: block;
+    }
+    
+    .quiz-option {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .quiz-option:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .quiz-option.selected {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-quiz-nav {
+        min-width: 120px;
+    }
+    
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    
+    .progress-dot {
+        height: 10px;
+        width: 10px;
+        margin: 0 5px;
+        background-color: #dee2e6;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .progress-dot.active {
+        background-color: #0d6efd;
+        transform: scale(1.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-4 text-center">{{ topic | title }} Quiz</h1>
+                    <p class="text-center mb-4">This custom quiz will help you learn more about {{ topic | lower }} with questions at {{ difficulty }} level.</p>
+                    
+                    <!-- Quiz Questions -->
+                    <div id="quiz-section">
+                        <!-- Progress dots -->
+                        <div class="progress-indicator mb-4" id="progress-dots">
+                            {% for q in questions %}
+                                <div class="progress-dot {% if loop.index == 1 %}active{% endif %}"></div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Quiz container -->
+                        <div class="quiz-container">
+                            <form id="quizForm" action="{{ url_for('process_quiz') }}" method="POST">
+                                <input type="hidden" name="quiz_id" value="custom_{{ topic }}">
+                                <input type="hidden" name="mood" value="neutral">
+                                
+                                <!-- Quiz cards -->
+                                {% for question in questions %}
+                                    <div class="quiz-card {% if loop.index == 1 %}active{% endif %}" id="question-{{ loop.index0 }}">
+                                        <h4 class="mb-4">{{ question.question }}</h4>
+                                        <div class="quiz-options">
+                                            {% set question_index = loop.index0 %}
+                                            {% for option in question.options %}
+                                                <div class="quiz-option" data-question="{{ question_index }}" data-option="{{ loop.index0 }}">
+                                                    {{ option }}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <input type="hidden" name="question_{{ loop.index0 }}" id="answer-{{ loop.index0 }}" value="">
+                                    </div>
+                                {% endfor %}
+                                
+                                <!-- Navigation buttons -->
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" id="prev-question" class="btn btn-outline-primary btn-quiz-nav" disabled>
+                                        <i class="fas fa-arrow-left me-2"></i>Previous
+                                    </button>
+                                    <button type="button" id="next-question" class="btn btn-primary btn-quiz-nav">
+                                        Next<i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                    <button type="submit" id="submit-quiz" class="btn btn-success btn-quiz-nav d-none">
+                                        <i class="fas fa-check-circle me-2"></i>Submit
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <a href="{{ url_for('other_quizzes') }}" class="text-muted small">Cancel and return to quizzes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variable declarations
+        const questions = JSON.parse('{{ questions|tojson|safe }}');
+        const quizCards = document.querySelectorAll('.quiz-card');
+        const progressDots = document.querySelectorAll('.progress-dot');
+        const prevButton = document.getElementById('prev-question');
+        const nextButton = document.getElementById('next-question');
+        const submitButton = document.getElementById('submit-quiz');
+        const userAnswers = {};
+        let currentQuestion = 0;
+        
+        // Initialize the quiz
+        showQuestion(currentQuestion);
+        
+        // Event listeners for quiz options
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionIndex = this.dataset.question;
+                const optionIndex = this.dataset.option;
+                const optionText = this.textContent.trim();
+                
+                // Remove selected class from all options in this question
+                document.querySelectorAll(`.quiz-option[data-question="${questionIndex}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Store the answer
+                userAnswers[questionIndex] = optionText;
+                document.getElementById(`answer-${questionIndex}`).value = optionText;
+                
+                // Enable next/submit button
+                if (currentQuestion === quizCards.length - 1) {
+                    submitButton.disabled = false;
+                } else {
+                    nextButton.disabled = false;
+                }
+            });
+        });
+        
+        // Function to show a specific question
+        function showQuestion(index) {
+            // Hide all cards and update progress dots
+            quizCards.forEach((card, i) => {
+                card.classList.remove('active');
+                progressDots[i].classList.remove('active');
+            });
+            
+            // Show current card and update progress dot
+            quizCards[index].classList.add('active');
+            progressDots[index].classList.add('active');
+            
+            // Update navigation buttons
+            prevButton.disabled = index === 0;
+            
+            if (index === quizCards.length - 1) {
+                nextButton.classList.add('d-none');
+                submitButton.classList.remove('d-none');
+                submitButton.disabled = !userAnswers[index];
+            } else {
+                nextButton.classList.remove('d-none');
+                submitButton.classList.add('d-none');
+                nextButton.disabled = !userAnswers[index];
+            }
+            
+            // Update current question index
+            currentQuestion = index;
+        }
+        
+        // Event listeners for navigation buttons
+        prevButton.addEventListener('click', function() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        });
+        
+        nextButton.addEventListener('click', function() {
+            if (currentQuestion < quizCards.length - 1) {
+                showQuestion(currentQuestion + 1);
+            }
+        });
+        
+        // Form submission
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            const answeredQuestions = Object.keys(userAnswers).length;
+            
+            if (answeredQuestions < quizCards.length) {
+                e.preventDefault();
+                const confirmation = confirm(`You've only answered ${answeredQuestions} out of ${quizCards.length} questions. Are you sure you want to submit?`);
+                
+                if (!confirmation) {
+                    return false;
+                }
+                // If confirmed, let the form submit normally
+            }
+            // Let the form submit normally in all cases - no AJAX
+        });
+    });
+</script>
+{% endblock %} 

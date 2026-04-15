@@ -1,0 +1,553 @@
+{% extends 'base.html' %}
+
+{% block title %}Articles - Mental Health Support{% endblock %}
+
+{% block extra_css %}
+<style>
+    .article-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .article-img-top {
+        height: 180px;
+        object-fit: cover;
+    }
+    .featured-article {
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .search-box {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .search-box input {
+        padding-left: 45px;
+        border-radius: 30px;
+        height: 50px;
+    }
+    .search-box i {
+        position: absolute;
+        left: 20px;
+        top: 17px;
+        color: #6c757d;
+    }
+    .article-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 mb-2">Mental Health Articles</h1>
+            <p class="lead text-muted">Explore our collection of expert-written articles on mental health topics.</p>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-box mb-4">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" id="articleSearch" placeholder="Search articles by title, category, or content...">
+    </div>
+
+    <!-- Categories -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3">Browse by Category</h4>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-primary rounded-pill category-filter active" data-category="all">All</button>
+                <button class="btn btn-outline-secondary rounded-pill category-filter" data-category="anxiety">Anxiety</button>
+                <button class="btn btn-outline-success rounded-pill category-filter" data-category="depression">Depression</button>
+                <button class="btn btn-outline-info rounded-pill category-filter" data-category="mindfulness">Mindfulness</button>
+                <button class="btn btn-outline-warning rounded-pill category-filter" data-category="sleep">Sleep</button>
+                <button class="btn btn-outline-danger rounded-pill category-filter" data-category="stress">Stress Management</button>
+                <button class="btn btn-outline-dark rounded-pill category-filter" data-category="productivity">Productivity & Focus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Article -->
+    <div class="featured-article mb-5">
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1553708881-112abc53fe54?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                         class="img-fluid rounded-start h-100 w-100" style="object-fit: cover;" alt="Featured Article">
+                </div>
+                <div class="col-md-6">
+                    <div class="card-body p-4 p-md-5">
+                        <span class="badge bg-primary mb-2">Featured</span>
+                        <span class="badge bg-success mb-2">Mindfulness</span>
+                        <h2 class="card-title h1 mb-3">The Science of Mindfulness: How Being Present Can Transform Your Mental Health</h2>
+                        <div class="article-meta mb-3">
+                            <i class="far fa-calendar-alt me-1"></i> May 20, 2023
+                            <i class="far fa-clock ms-3 me-1"></i> 12 min read
+                            <i class="far fa-user ms-3 me-1"></i> By Dr. Sarah Johnson
+                        </div>
+                        <p class="card-text lead">Discover how mindfulness practices can rewire your brain, reduce anxiety, and improve overall well-being through simple daily practices.</p>
+                        <a href="#" class="btn btn-lg btn-primary mt-3 read-more-btn">Read Full Article</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Articles -->
+    <div class="row mb-5">
+        <div class="col-12"><h3 class="mb-4">Latest Articles</h3></div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="productivity">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-dark mb-2">Productivity & Focus</span>
+                    <h5 class="card-title">Why You Can't Focus Anymore: The Attention Crisis Explained</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> March 10, 2025
+                        <i class="far fa-clock ms-3 me-1"></i> 9 min read
+                    </div>
+                    <p class="card-text">Our average attention span has dropped dramatically. Here's what's happening in your brain and how to reclaim your focus in a distraction-saturated world.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="productivity">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-dark mb-2">Productivity & Focus</span>
+                    <h5 class="card-title">Anhedonia: When You Lose Interest in Everything You Once Loved</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> February 18, 2025
+                        <i class="far fa-clock ms-3 me-1"></i> 8 min read
+                    </div>
+                    <p class="card-text">Feeling numb, disinterested, and disconnected from hobbies and people? Anhedonia is more common than you think — and it's treatable.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="productivity">
+            <div class="card article-card h-100">
+<img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">                <div class="card-body">
+                    <span class="badge bg-dark mb-2">Productivity & Focus</span>
+                    <h5 class="card-title">Dopamine Detox: Resetting Your Brain's Reward System</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> January 5, 2025
+                        <i class="far fa-clock ms-3 me-1"></i> 10 min read
+                    </div>
+                    <p class="card-text">Constant scrolling, junk food, and instant gratification have hijacked your dopamine system. Learn how a digital detox can restore motivation and joy.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- More Articles -->
+    <div class="row mb-5">
+        <div class="col-12"><h3 class="mb-4">More Articles</h3></div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="mindfulness">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1573152958734-1922c188fba3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2">Mindfulness</span>
+                    <h5 class="card-title">5 Mindfulness Exercises to Reduce Anxiety in Minutes</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> May 15, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 8 min read
+                    </div>
+                    <p class="card-text">Quick and effective mindfulness techniques that you can practice anywhere to bring immediate calm and clarity to anxious moments.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="sleep">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1520333789090-1afc82db536a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-info mb-2">Sleep</span>
+                    <h5 class="card-title">The Connection Between Sleep Quality and Mental Health</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> April 28, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 6 min read
+                    </div>
+                    <p class="card-text">Understanding how sleep affects your brain function, mood regulation, and overall mental wellbeing, with practical tips for better sleep.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="stress">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1516726817505-f5ed825624d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-danger mb-2">Stress Management</span>
+                    <h5 class="card-title">Building Resilience: How to Thrive Under Pressure</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> April 15, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 10 min read
+                    </div>
+                    <p class="card-text">Strategies and practices that help develop mental toughness and emotional resilience to better handle life's challenges.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="depression">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">Depression</span>
+                    <h5 class="card-title">Understanding Depression: Beyond the Blues</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> March 20, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 11 min read
+                    </div>
+                    <p class="card-text">An in-depth look at the causes, symptoms, and treatments for depression, with guidance on when to seek professional help.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="anxiety">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">Anxiety</span>
+                    <h5 class="card-title">Recognizing Anxiety Triggers and Building Coping Strategies</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> March 5, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 9 min read
+                    </div>
+                    <p class="card-text">Learn to identify what triggers your anxiety and develop personalized strategies to manage symptoms effectively.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="mindfulness">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2">Mindfulness</span>
+                    <h5 class="card-title">Creating a Mindfulness Practice That Fits Your Lifestyle</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> February 15, 2023
+                        <i class="far fa-clock ms-3 me-1"></i> 7 min read
+                    </div>
+                    <p class="card-text">How to develop a sustainable mindfulness practice that works with your schedule and personal preferences.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="productivity">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-dark mb-2">Productivity & Focus</span>
+                    <h5 class="card-title">Brain Fog: Why Your Mind Feels Cloudy and How to Clear It</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> November 12, 2024
+                        <i class="far fa-clock ms-3 me-1"></i> 7 min read
+                    </div>
+                    <p class="card-text">Struggling to think clearly, remember things, or stay on task? Brain fog has real causes — and real solutions backed by science.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="productivity">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-dark mb-2">Productivity & Focus</span>
+                    <h5 class="card-title">How Doomscrolling is Rewiring Your Brain</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> October 3, 2024
+                        <i class="far fa-clock ms-3 me-1"></i> 6 min read
+                    </div>
+                    <p class="card-text">Endless scrolling through negative news isn't just a habit — it's changing your neural pathways. Here's how to break the cycle and protect your mental health.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4 article-item" data-category="stress">
+            <div class="card article-card h-100">
+                <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=800&q=80" class="card-img-top article-img-top" alt="">
+                <div class="card-body">
+                    <span class="badge bg-danger mb-2">Stress Management</span>
+                    <h5 class="card-title">Burnout vs. Laziness: How to Tell the Difference</h5>
+                    <div class="article-meta mb-2">
+                        <i class="far fa-calendar-alt me-1"></i> September 20, 2024
+                        <i class="far fa-clock ms-3 me-1"></i> 8 min read
+                    </div>
+                    <p class="card-text">Many people mistake burnout for laziness and push themselves harder, making things worse. Learn to recognize the signs and give yourself the right kind of recovery.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary read-more-btn">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body p-4 text-center">
+                    <h4 class="mb-3">Subscribe to Our Newsletter</h4>
+                    <p class="text-muted mb-4">Get the latest articles, resources, and updates delivered to your inbox.</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                                <button class="btn btn-primary">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Modal -->
+    <div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="articleModalContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex justify-content-between w-100">
+                        <span class="modal-author text-muted"></span>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Search
+    document.getElementById('articleSearch').addEventListener('input', function () {
+        const term = this.value.toLowerCase().trim();
+        document.querySelectorAll('.article-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+
+    // Category filter
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const cat = this.dataset.category;
+            document.querySelectorAll('.article-item').forEach(item => {
+                item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
+            });
+        });
+    });
+
+    // Article content map
+    const articles = {
+        "Why You Can't Focus Anymore: The Attention Crisis Explained": {
+            author: "Dr. Priya Nair, Cognitive Neuroscientist",
+            content: `
+                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">
+                <p class="lead">Studies show the average human attention span has declined significantly over the past decade — and smartphones are only part of the story.</p>
+                <h4 class="mt-4">What's Happening in Your Brain</h4>
+                <p>Every time you check a notification, your brain releases a small hit of dopamine. Over time, your brain starts to crave this constant stimulation, making it harder to sustain attention on slower, deeper tasks like reading or focused work.</p>
+                <h4 class="mt-4">Signs Your Attention is Suffering</h4>
+                <ul>
+                    <li>Unable to read more than a few paragraphs without losing focus</li>
+                    <li>Constantly switching between tasks without finishing any</li>
+                    <li>Feeling restless during quiet, unstimulating moments</li>
+                    <li>Difficulty following long conversations or lectures</li>
+                </ul>
+                <h4 class="mt-4">How to Rebuild Your Focus</h4>
+                <ol>
+                    <li><strong>Single-tasking:</strong> Commit to one task at a time for defined blocks of time</li>
+                    <li><strong>Phone-free periods:</strong> Keep your phone in another room for at least 2 hours daily</li>
+                    <li><strong>Deep work sessions:</strong> Use the Pomodoro technique — 25 minutes of focus, 5-minute break</li>
+                    <li><strong>Read physical books:</strong> Long-form reading rebuilds sustained attention</li>
+                    <li><strong>Boredom tolerance:</strong> Allow yourself to be bored — it strengthens your attentional muscles</li>
+                </ol>
+                <p class="mt-3">Rebuilding attention takes weeks, not days. Be patient and consistent.</p>`
+        },
+        "Anhedonia: When You Lose Interest in Everything You Once Loved": {
+            author: "Dr. Aisha Mehta, Clinical Psychologist",
+            content: `
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">
+                <p class="lead">Anhedonia — the inability to feel pleasure from activities once enjoyed — is one of the hallmark symptoms of depression, burnout, and several other mental health conditions.</p>
+                <h4 class="mt-4">What Anhedonia Feels Like</h4>
+                <p>People with anhedonia often describe a sense of emotional flatness. Hobbies feel pointless, socializing feels exhausting, and even good news fails to spark joy. It's not sadness — it's emptiness.</p>
+                <h4 class="mt-4">Why It Happens</h4>
+                <p>Anhedonia is linked to disruptions in the brain's dopamine system — the same system responsible for motivation and reward. Chronic stress, sleep deprivation, and prolonged low mood can all dampen dopamine activity.</p>
+                <h4 class="mt-4">What You Can Do</h4>
+                <ol>
+                    <li><strong>Behavioral activation:</strong> Schedule small enjoyable activities even when you don't feel like it — action precedes motivation</li>
+                    <li><strong>Reduce overstimulation:</strong> Cut back on high-dopamine activities like social media and video games temporarily</li>
+                    <li><strong>Exercise:</strong> Even a 20-minute walk significantly boosts dopamine and serotonin</li>
+                    <li><strong>Sleep consistently:</strong> Irregular sleep worsens anhedonia dramatically</li>
+                    <li><strong>Seek professional help:</strong> Therapy and sometimes medication can be highly effective</li>
+                </ol>`
+        },
+        "Dopamine Detox: Resetting Your Brain's Reward System": {
+            author: "Dr. Rohan Verma, Behavioral Neuroscientist",
+            content: `
+<img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">                <p class="lead">When your brain is flooded with constant dopamine spikes from social media, junk food, and entertainment, everyday life starts to feel boring and unpleasant by comparison.</p>
+                <h4 class="mt-4">The Problem with Overstimulation</h4>
+                <p>Each dopamine hit from a like, a funny video, or a sugary snack sets a new baseline for your brain's reward threshold. Over time, normal activities — studying, having a conversation, going for a walk — fail to register as rewarding at all.</p>
+                <h4 class="mt-4">What a Dopamine Detox Involves</h4>
+                <ul>
+                    <li>Avoiding social media, streaming, and gaming for 24–48 hours</li>
+                    <li>Eating simple, unprocessed meals</li>
+                    <li>Spending time in nature or in quiet reflection</li>
+                    <li>Journaling, stretching, or light exercise</li>
+                </ul>
+                <h4 class="mt-4">What to Expect</h4>
+                <p>The first few hours will feel uncomfortable — restless, bored, even anxious. This is normal. By the end of a full detox day, most people report feeling calmer, clearer, and more motivated. After a week of reduced stimulation, your baseline resets and previously "boring" activities start feeling enjoyable again.</p>`
+        },
+        "Brain Fog: Why Your Mind Feels Cloudy and How to Clear It": {
+            author: "Dr. Kavya Suresh, Neurologist",
+            content: `
+                <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">
+                <p class="lead">Brain fog isn't a medical diagnosis — but it's very real. It describes a cluster of symptoms that make thinking, remembering, and concentrating feel like wading through mud.</p>
+                <h4 class="mt-4">Common Symptoms</h4>
+                <ul>
+                    <li>Difficulty concentrating or completing thoughts</li>
+                    <li>Forgetting words mid-sentence</li>
+                    <li>Feeling mentally slow or "offline"</li>
+                    <li>Difficulty making decisions</li>
+                </ul>
+                <h4 class="mt-4">Common Causes</h4>
+                <ul>
+                    <li><strong>Sleep deprivation:</strong> Even one bad night impairs cognitive function significantly</li>
+                    <li><strong>Poor diet:</strong> High sugar, low nutrient intake affects brain function</li>
+                    <li><strong>Chronic stress:</strong> Elevated cortisol shrinks the hippocampus over time</li>
+                    <li><strong>Dehydration:</strong> The brain is 75% water — even mild dehydration impairs focus</li>
+                    <li><strong>Mental health conditions:</strong> Depression and anxiety are major contributors</li>
+                </ul>
+                <h4 class="mt-4">How to Clear It</h4>
+                <ol>
+                    <li>Prioritize 7–9 hours of quality sleep</li>
+                    <li>Drink at least 2 litres of water daily</li>
+                    <li>Eat omega-3 rich foods (fish, walnuts, flaxseed)</li>
+                    <li>Take regular breaks — especially screen breaks</li>
+                    <li>Exercise at least 3 times per week</li>
+                </ol>`
+        },
+        "How Doomscrolling is Rewiring Your Brain": {
+            author: "Dr. Fatima Al-Rashid, Digital Wellness Researcher",
+            content: `
+                <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">
+                <p class="lead">Doomscrolling — compulsively consuming negative news online — has become one of the defining mental health challenges of our era.</p>
+                <h4 class="mt-4">Why We Do It</h4>
+                <p>Our brains are wired to prioritize threats. Negative news triggers the amygdala's alarm system, making it feel urgent and important. Social media algorithms exploit this bias, serving increasingly alarming content to keep you engaged.</p>
+                <h4 class="mt-4">The Neurological Damage</h4>
+                <ul>
+                    <li>Chronically elevated cortisol levels</li>
+                    <li>Reduced activity in the prefrontal cortex (decision-making)</li>
+                    <li>Increased anxiety and helplessness</li>
+                    <li>Disrupted sleep from late-night scrolling</li>
+                    <li>Shortened attention span and reduced reading depth</li>
+                </ul>
+                <h4 class="mt-4">Breaking the Cycle</h4>
+                <ol>
+                    <li><strong>Set hard limits:</strong> Use screen time controls to cap news app usage</li>
+                    <li><strong>Scheduled news time:</strong> Check news once a day at a fixed time only</li>
+                    <li><strong>Replace the habit:</strong> When you feel the urge to scroll, replace it with a 5-minute walk or breathing exercise</li>
+                    <li><strong>Curate your feed:</strong> Unfollow accounts that consistently cause distress</li>
+                    <li><strong>Phone-free bedroom:</strong> Keep devices out of your sleeping space</li>
+                </ol>`
+        },
+        "Burnout vs. Laziness: How to Tell the Difference": {
+            author: "Dr. Samuel Osei, Occupational Psychologist",
+            content: `
+                <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4">
+                <p class="lead">Calling yourself lazy when you're actually burned out is one of the most damaging things you can do to your recovery.</p>
+                <h4 class="mt-4">Key Differences</h4>
+                <table class="table table-bordered mt-3">
+                    <thead class="table-light"><tr><th>Burnout</th><th>Laziness</th></tr></thead>
+                    <tbody>
+                        <tr><td>Want to do things but physically/mentally can't</td><td>Don't want to do things and don't care</td></tr>
+                        <tr><td>Feel guilty about not being productive</td><td>Feel comfortable not being productive</td></tr>
+                        <tr><td>Exhausted even after rest</td><td>Energized but choosing not to act</td></tr>
+                        <tr><td>Caused by prolonged overwork or stress</td><td>Not caused by external overload</td></tr>
+                    </tbody>
+                </table>
+                <h4 class="mt-4">Recovering from Burnout</h4>
+                <ol>
+                    <li><strong>Rest without guilt:</strong> Recovery requires genuine downtime, not just switching tasks</li>
+                    <li><strong>Identify the source:</strong> Work, relationships, or caregiving responsibilities need to be addressed</li>
+                    <li><strong>Set boundaries:</strong> Learn to say no and protect your time and energy</li>
+                    <li><strong>Gradual re-engagement:</strong> Don't try to go from 0 to 100 — build back slowly</li>
+                    <li><strong>Professional support:</strong> A therapist can help you process and restructure your load</li>
+                </ol>`
+        }
+    };
+
+    // Modal logic
+    const modal = new bootstrap.Modal(document.getElementById('articleModal'));
+    const modalTitle = document.getElementById('articleModalLabel');
+    const modalContent = document.getElementById('articleModalContent');
+    const modalAuthor = document.querySelector('.modal-author');
+
+    document.querySelectorAll('.read-more-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const card = this.closest('.card');
+            const titleEl = card ? card.querySelector('.card-title') : null;
+            const title = titleEl ? titleEl.textContent.trim() : 'Article';
+
+            modalTitle.textContent = title;
+            modalContent.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-3">Loading...</p></div>`;
+            modal.show();
+
+            setTimeout(() => {
+                if (articles[title]) {
+                    modalContent.innerHTML = articles[title].content;
+                    modalAuthor.textContent = articles[title].author;
+                } else {
+                    modalContent.innerHTML = `<p class="lead">Full content for this article is coming soon. Check back later!</p>`;
+                    modalAuthor.textContent = '';
+                }
+            }, 600);
+        });
+    });
+
+});
+</script>
+{% endblock %}

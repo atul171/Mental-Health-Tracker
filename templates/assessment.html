@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Mental Health Assessment - MindWell{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:800px">
+
+    {% if not questions %}
+    <!-- Step 1: Mood Input -->
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-stethoscope text-primary me-2"></i>AI Mental Health Assessment
+            </h2>
+            <p class="text-muted mb-4">
+                Tell us how you're feeling and our AI will generate a personalized diagnostic
+                assessment just for you.
+            </p>
+            <div class="alert alert-warning">
+                ⚠️ This is a <strong>screening tool only</strong>, not a clinical diagnosis.
+                Always consult a licensed mental health professional for proper evaluation.
+            </div>
+
+            <form method="POST" action="/generate_assessment">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">How are you feeling right now?</label>
+                    <textarea name="mood" class="form-control" rows="4" required
+                        placeholder="Describe how you've been feeling lately. For example: I've been feeling very anxious and overwhelmed at work, struggling to sleep, and losing interest in things I used to enjoy..."></textarea>
+                    <div class="form-text">The more detail you provide, the more personalized your assessment will be.</div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-magic me-2"></i>Generate My Assessment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Step 2: AI Generated Questions -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-clipboard-list text-primary me-2"></i>Your Personalized Assessment
+            </h2>
+            <p class="text-muted mb-0">
+                Based on how you described your feelings, our AI has generated the following
+                questions. Answer each one honestly.
+            </p>
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                You described feeling: <strong>"{{ mood }}"</strong>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="/submit_assessment" id="assessmentForm">
+        <!-- Question Slides -->
+        {% for q in questions %}{% set outer_loop = loop %}
+        <div class="question-slide {% if not loop.first %}d-none{% endif %}" data-index="{{ outer_loop.index0 }}">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <!-- Progress -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">Question {{ outer_loop.index }} of {{ questions|length }}</small>
+                        <small class="text-muted">{{ ((outer_loop.index / questions|length) * 100)|int }}% complete</small>
+                    </div>
+                    <div class="progress mb-4" style="height:6px">
+                        <div class="progress-bar bg-primary" style="width:{{ ((outer_loop.index / questions|length) * 100)|int }}%"></div>
+                    </div>
+
+                    <p class="fw-semibold fs-5 mb-4">{{ q.question }}</p>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% for opt in q.options %}
+                        <div class="form-check border rounded p-3 option-card">
+                            <input class="form-check-input" type="radio"
+                                   name="question_{{ outer_loop.index0 }}"
+                                   id="q{{ outer_loop.index }}_opt{{ loop.index0 }}"
+                                   value="{{ opt.value }}"
+                                   {% if opt.value == 0 %}checked{% endif %}>
+                            <label class="form-check-label w-100"
+                                   for="q{{ outer_loop.index }}_opt{{ loop.index0 }}">
+                                {{ opt.label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="d-flex justify-content-between mt-4">
+                        {% if not loop.first %}
+                        <button type="button" class="btn btn-outline-secondary prev-btn">
+                            <i class="fas fa-arrow-left me-1"></i> Previous
+                        </button>
+                        {% else %}
+                        <a href="/assessment" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-1"></i> Start Over
+                        </a>
+                        {% endif %}
+
+                        {% if not loop.last %}
+                        <button type="button" class="btn btn-primary next-btn">
+                            Next <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i> Submit & Get Results
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </form>
+    {% endif %}
+
+</div>
+
+<style>
+.option-card { cursor: pointer; transition: all 0.2s; }
+.option-card:hover { background-color: #f0f4ff; border-color: #0d6efd !important; }
+.option-card:has(input:checked) { background-color: #e8f0fe; border-color: #0d6efd !important; }
+.form-check-input:checked + .form-check-label { color: #0d6efd; font-weight: 600; }
+.question-slide { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const slides = document.querySelectorAll('.question-slide');
+
+    function showSlide(index) {
+        slides.forEach(s => s.classList.add('d-none'));
+        slides[index].classList.remove('d-none');
+        slides[index].style.animation = 'none';
+        slides[index].offsetHeight; // reflow
+        slides[index].style.animation = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Next buttons
+    document.querySelectorAll('.next-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const current = this.closest('.question-slide');
+            const index = parseInt(current.dataset.index);
+            showSlide(index + 1);
+        });
+    });
+
+    // Previous buttons
+    document.querySelectorAll('.prev-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const current = this.closest('.question-slide');
+            const index = parseInt(current.dataset.index);
+            showSlide(index - 1);
+        });
+    });
+
+    // Make entire option card clickable
+    document.querySelectorAll('.option-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            const radio = this.querySelector('input[type=radio]');
+            if (radio) radio.checked = true;
+            // Remove selected style from siblings
+            this.closest('.d-flex').querySelectorAll('.option-card').forEach(c => c.style.backgroundColor = '');
+        });
+    });
+});
+</script>
+{% endblock %}

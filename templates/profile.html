@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - MindWell{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">My Profile</h1>
+        <p class="lead">Manage your account information and preferences.</p>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PASTE THIS BLOCK inside profile.html, after your existing
+     stats cards section (assessments_completed / chat_sessions /
+     meditation_minutes cards) and before the closing </div> of
+     the profile container.
+════════════════════════════════════════════════════════════════ -->
+
+<!-- Assessment History Card -->
+<div class="card shadow-sm mt-4">
+  <div class="card-header d-flex align-items-center justify-content-between py-3">
+    <h5 class="mb-0 fw-semibold">
+      <i class="fas fa-clipboard-list me-2 text-primary"></i>Assessment History
+    </h5>
+    <a href="{{ url_for('assessment') }}" class="btn btn-sm btn-outline-primary">
+      Take New Assessment
+    </a>
+  </div>
+
+  <div class="card-body p-0">
+    {% if assessments %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Date</th>
+            <th>Mood Described</th>
+            <th class="text-center">Score</th>
+            <th class="text-center">Severity</th>
+            <th class="text-center">Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assessments %}
+          <tr>
+            <!-- Date -->
+            <td class="ps-4 text-muted" style="white-space:nowrap; font-size:.875rem;">
+              {{ a.date.strftime('%b %d, %Y') if a.date else '—' }}
+            </td>
+
+            <!-- Mood chip -->
+            <td>
+              <span class="badge rounded-pill bg-light text-dark border"
+                    style="font-size:.8rem; font-weight:500; max-width:180px;
+                           overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                           display:inline-block; vertical-align:middle;"
+                    title="{{ a.mood }}">
+                {{ a.mood | truncate(30, True, '…') }}
+              </span>
+            </td>
+
+            <!-- Numeric score -->
+            <td class="text-center fw-semibold">
+              {{ a.total_score }} / {{ a.max_score }}
+            </td>
+
+            <!-- Severity badge -->
+            <td class="text-center">
+              {% set color_map = {
+                  'success': 'success',
+                  'info':    'info',
+                  'warning': 'warning',
+                  'orange':  'warning',
+                  'danger':  'danger'
+              } %}
+              <span class="badge bg-{{ color_map.get(a.severity_color, 'secondary') }}
+                           {% if a.severity_color == 'orange' %}text-dark{% endif %}">
+                {{ a.severity }}
+              </span>
+            </td>
+
+            <!-- Mini progress bar -->
+            <td style="min-width:120px;">
+              {% set bar_color = {
+                  'success': '#198754',
+                  'info':    '#0dcaf0',
+                  'warning': '#ffc107',
+                  'orange':  '#fd7e14',
+                  'danger':  '#dc3545'
+              }.get(a.severity_color, '#6c757d') %}
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:8px; border-radius:4px;">
+                  <div class="progress-bar"
+                       role="progressbar"
+                       style="width:{{ a.percent }}%; background-color:{{ bar_color }};"
+                       aria-valuenow="{{ a.percent }}"
+                       aria-valuemin="0"
+                       aria-valuemax="100">
+                  </div>
+                </div>
+                <small class="text-muted" style="font-size:.75rem; white-space:nowrap;">
+                  {{ a.percent }}%
+                </small>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if assessments | length == 10 %}
+    <div class="text-center py-3 border-top">
+      <small class="text-muted">Showing your 10 most recent assessments.</small>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-clipboard fa-2x mb-3 d-block opacity-50"></i>
+      <p class="mb-1 fw-semibold">No assessments yet</p>
+      <p class="small mb-3">Complete a diagnostic assessment to track your mental health over time.</p>
+      <a href="{{ url_for('assessment') }}" class="btn btn-primary btn-sm">
+        Start Your First Assessment
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="row">
+    <!-- Profile Information Card -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Profile Information</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('update_profile') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.first_name if user.first_name else '' }}" required>
+                            <div class="invalid-feedback">Please enter your first name.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.last_name if user.last_name else '' }}" required>
+                            <div class="invalid-feedback">Please enter your last name.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone if user.phone else '' }}">
+                        <div class="form-text">Optional - for appointment reminders and important notifications only.</div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Security Settings Card -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Settings</h4>
+            </div>
+            <div class="card-body p-4">
+                <form id="passwordForm" class="needs-validation" novalidate>
+                    <div id="passwordAlert" class="alert d-none mb-3" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                        <div class="invalid-feedback">Please enter your current password.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                        <div class="form-text">Must be at least 8 characters long.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                        <div class="invalid-feedback">Passwords do not match.</div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary py-2" id="changePasswordBtn">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Cards -->
+    <div class="col-lg-4">
+        <!-- User Stats Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Your Activity</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-primary text-white me-3">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ user.assessments_completed|default(0) }}</h5>
+                        <p class="text-muted mb-0">Assessments Completed</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-success text-white me-3">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ user.chat_sessions|default(0) }}</h5>
+                        <p class="text-muted mb-0">Chat Sessions</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle bg-info text-white me-3">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ user.meditation_minutes|default(0) }}</h5>
+                        <p class="text-muted mb-0">Meditation Minutes</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <p class="text-muted text-center mb-0">Member since {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'N/A' }}</p>
+            </div>
+        </div>
+        
+        <!-- Notification Settings Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                    <label class="form-check-label" for="emailNotifications">Email Notifications</label>
+                    <div class="form-text">Receive updates about new features and resources.</div>
+                </div>
+                
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="reminderNotifications" checked>
+                    <label class="form-check-label" for="reminderNotifications">Wellness Reminders</label>
+                    <div class="form-text">Receive reminders for meditation and assessments.</div>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="appointmentNotifications" checked>
+                    <label class="form-check-label" for="appointmentNotifications">Appointment Alerts</label>
+                    <div class="form-text">Receive alerts about upcoming appointments.</div>
+                </div>
+                
+                <div class="d-grid mt-4">
+                    <button class="btn btn-outline-primary py-2">
+                        <i class="fas fa-save me-2"></i>Save Preferences
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Actions Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Account Actions</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-download me-2"></i>Download My Data
+                    </a>
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="fas fa-trash-alt me-2"></i>Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Account</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.</p>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand that deleting my account is permanent
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label for="deleteReason" class="form-label">Please tell us why you're leaving (optional)</label>
+                    <textarea class="form-control" id="deleteReason" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash-alt me-2"></i>Delete My Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+        
+        // Password validation
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        
+        confirmPassword.addEventListener('input', function() {
+            if (this.value !== newPassword.value) {
+                this.setCustomValidity('Passwords do not match.');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        // Password change submission
+        const passwordForm = document.getElementById('passwordForm');
+        const passwordAlert = document.getElementById('passwordAlert');
+        
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!this.checkValidity()) {
+                this.classList.add('was-validated');
+                return;
+            }
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Basic validation
+            if (newPassword !== confirmPassword) {
+                showPasswordAlert('danger', 'New passwords do not match.');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showPasswordAlert('danger', 'Password must be at least 8 characters long.');
+                return;
+            }
+            
+            // Send AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '/change_password',
+                data: {
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                },
+                success: function(response) {
+                    showPasswordAlert('success', 'Password updated successfully!');
+                    passwordForm.reset();
+                    passwordForm.classList.remove('was-validated');
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON || {};
+                    const message = response.message || 'An error occurred. Please try again.';
+                    showPasswordAlert('danger', message);
+                }
+            });
+        });
+        
+        function showPasswordAlert(type, message) {
+            passwordAlert.className = `alert alert-${type}`;
+            passwordAlert.textContent = message;
+            passwordAlert.classList.remove('d-none');
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    passwordAlert.classList.add('d-none');
+                }, 5000);
+            }
+        }
+        
+        // Delete account confirmation
+        const confirmDelete = document.getElementById('confirmDelete');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        confirmDelete.addEventListener('change', function() {
+            confirmDeleteBtn.disabled = !this.checked;
+        });
+        
+        // Notification toggle functionality would go here in a real app
+    });
+</script>
+{% endblock %} 

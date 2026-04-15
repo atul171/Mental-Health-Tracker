@@ -1,0 +1,367 @@
+{% block content %}
+// ... existing code ...
+
+    <!-- Newsletter -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body p-4 text-center">
+                    <h4 class="mb-3">Subscribe to Our Newsletter</h4>
+                    <p class="text-muted mb-4">Get the latest articles, resources, and updates delivered to your inbox.</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                                <button class="btn btn-primary">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Article Modal -->
+    <div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="articleModalContent">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading article content...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex justify-content-between w-100">
+                        <div>
+                            <span class="modal-author text-muted"></span>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a href="#" class="btn btn-primary" id="fullArticleLink" target="_blank">Read Full Article</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('articleSearch');
+        const articleItems = document.querySelectorAll('.article-item');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            articleItems.forEach(item => {
+                const title = item.querySelector('.card-title').textContent.toLowerCase();
+                const category = item.querySelector('.badge').textContent.toLowerCase();
+                const content = item.querySelector('.card-text').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || category.includes(searchTerm) || content.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Category filtering
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        
+        categoryFilters.forEach(filter => {
+            filter.addEventListener('click', function() {
+                // Remove active class from all filters
+                categoryFilters.forEach(f => f.classList.remove('active'));
+                
+                // Add active class to clicked filter
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                
+                articleItems.forEach(item => {
+                    if (category === 'all' || item.dataset.category === category) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Modal functionality for Read More buttons
+        const articleModal = new bootstrap.Modal(document.getElementById('articleModal'));
+        const modalTitle = document.getElementById('articleModalLabel');
+        const modalContent = document.getElementById('articleModalContent');
+        const modalAuthor = document.querySelector('.modal-author');
+        const fullArticleLink = document.getElementById('fullArticleLink');
+        
+        // Sample article data - in a real application, this would come from a database
+        const articleData = {
+            'mindfulness-exercises': {
+                title: '5 Mindfulness Exercises to Reduce Anxiety in Minutes',
+                content: `
+                    <img src="https://images.unsplash.com/photo-1573152958734-1922c188fba3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4" alt="Mindfulness Exercises">
+                    <p class="lead">Mindfulness is the practice of bringing your attention to the present moment with acceptance and without judgment. It has been shown to reduce anxiety, depression, and stress while improving focus, emotional regulation, and overall well-being.</p>
+                    
+                    <h4 class="mt-4">1. The 5-4-3-2-1 Grounding Technique</h4>
+                    <p>This exercise engages all five senses to help you center yourself in the present moment when anxiety starts to take over:</p>
+                    <ul>
+                        <li><strong>5:</strong> Acknowledge FIVE things you see around you</li>
+                        <li><strong>4:</strong> Acknowledge FOUR things you can touch around you</li>
+                        <li><strong>3:</strong> Acknowledge THREE things you hear</li>
+                        <li><strong>2:</strong> Acknowledge TWO things you can smell</li>
+                        <li><strong>1:</strong> Acknowledge ONE thing you can taste</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">2. Mindful Breathing</h4>
+                    <p>Take a comfortable seated position and focus on your breath for just one minute:</p>
+                    <ol>
+                        <li>Breathe in through your nose for 4 counts</li>
+                        <li>Hold for 2 counts</li>
+                        <li>Exhale slowly through your mouth for 6 counts</li>
+                        <li>Repeat 5-10 times</li>
+                    </ol>
+                    
+                    <h4 class="mt-4">3. Body Scan Meditation</h4>
+                    <p>A body scan helps bring awareness to each part of your body, releasing tension as you go:</p>
+                    <ol>
+                        <li>Sit or lie down in a comfortable position</li>
+                        <li>Close your eyes and bring attention to your feet</li>
+                        <li>Notice any sensations, tension, or discomfort</li>
+                        <li>Imagine breathing into that area and releasing tension as you exhale</li>
+                        <li>Slowly move up through your body: ankles, calves, knees, thighs, etc.</li>
+                    </ol>
+                    
+                    <h4 class="mt-4">4. Mindful Observation</h4>
+                    <p>Choose any natural object within your immediate environment (a flower, an insect, the clouds, or the moon) and focus on watching it for a minute or two. Don't do anything except notice the details and experience the object. Simply relax into watching for as long as your concentration allows.</p>
+                    
+                    <h4 class="mt-4">5. Three-Minute Breathing Space</h4>
+                    <p>This mini-meditation has three steps, taking about one minute each:</p>
+                    <ol>
+                        <li><strong>Awareness:</strong> Bring awareness to your thoughts, feelings, and sensations in the body</li>
+                        <li><strong>Gathering:</strong> Gently redirect your attention to your breathing</li>
+                        <li><strong>Expanding:</strong> Expand your awareness to your whole body, holding everything in awareness</li>
+                    </ol>
+                    
+                    <p class="mt-4">Practice these exercises regularly, not just when you're feeling anxious. The more you practice mindfulness during calm periods, the more effective these techniques will be during moments of anxiety.</p>
+                `,
+                author: 'Dr. Emma Richards, Clinical Psychologist',
+                fullArticleUrl: '#'
+            },
+            'sleep-mental-health': {
+                title: 'The Connection Between Sleep Quality and Mental Health',
+                content: `
+                    <img src="https://images.unsplash.com/photo-1520333789090-1afc82db536a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4" alt="Sleep and Mental Health">
+                    <p class="lead">The relationship between sleep and mental health is complex and bidirectional. Poor sleep can contribute to the development of mental health issues, and mental health problems can make it more difficult to sleep well.</p>
+                    
+                    <h4 class="mt-4">How Sleep Affects Your Mental Health</h4>
+                    <p>During sleep, your brain processes emotional information. Inadequate sleep can:</p>
+                    <ul>
+                        <li>Impair your ability to regulate emotions</li>
+                        <li>Increase negative emotional responses</li>
+                        <li>Decrease positive emotional responses</li>
+                        <li>Impair cognitive functions like attention, memory, and decision-making</li>
+                        <li>Increase risk for anxiety disorders and depression</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Common Sleep Disorders and Mental Health</h4>
+                    <p>Several sleep disorders show strong associations with mental health conditions:</p>
+                    <ul>
+                        <li><strong>Insomnia:</strong> Difficulty falling or staying asleep, associated with increased risk of depression, anxiety, and substance abuse</li>
+                        <li><strong>Sleep Apnea:</strong> Breathing interruptions during sleep, linked to mood disorders and cognitive impairment</li>
+                        <li><strong>Restless Legs Syndrome:</strong> Uncomfortable sensations in legs, associated with anxiety and depression</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Improving Sleep for Better Mental Health</h4>
+                    <p>Here are evidence-based strategies to improve sleep quality:</p>
+                    <ol>
+                        <li><strong>Maintain a consistent sleep schedule:</strong> Go to bed and wake up at the same time every day, even on weekends</li>
+                        <li><strong>Create a relaxing bedtime routine:</strong> Reading, gentle stretching, or meditation can signal to your body that it's time to wind down</li>
+                        <li><strong>Optimize your sleep environment:</strong> Keep your bedroom cool, dark, and quiet</li>
+                        <li><strong>Limit exposure to screens:</strong> The blue light from devices can interfere with melatonin production</li>
+                        <li><strong>Be mindful of food and drink:</strong> Avoid caffeine, alcohol, and heavy meals close to bedtime</li>
+                        <li><strong>Exercise regularly:</strong> Physical activity promotes better sleep, but try to finish workouts at least a few hours before bedtime</li>
+                    </ol>
+                    
+                    <p class="mt-4">If you're consistently having trouble sleeping, consider talking to a healthcare provider. Addressing sleep problems can be an important part of improving your mental health.</p>
+                `,
+                author: 'Dr. Michael Chang, Sleep Specialist',
+                fullArticleUrl: '#'
+            },
+            'building-resilience': {
+                title: 'Building Resilience: How to Thrive Under Pressure',
+                content: `
+                    <img src="https://images.unsplash.com/photo-1516726817505-f5ed825624d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded mb-4" alt="Building Resilience">
+                    <p class="lead">Resilience is the ability to adapt well in the face of adversity, trauma, tragedy, or significant sources of stress. It's about bouncing back from difficult experiences and growing stronger in the process.</p>
+                    
+                    <h4 class="mt-4">The Components of Resilience</h4>
+                    <p>Psychological research has identified several key factors that contribute to resilience:</p>
+                    <ul>
+                        <li><strong>Emotional regulation:</strong> The ability to manage strong feelings and impulses</li>
+                        <li><strong>Impulse control:</strong> The ability to think before acting</li>
+                        <li><strong>Causal analysis:</strong> The ability to accurately identify the causes of problems</li>
+                        <li><strong>Self-efficacy:</strong> The belief in one's ability to solve problems and trust in one's instincts</li>
+                        <li><strong>Realistic optimism:</strong> Maintaining a positive outlook while staying grounded in reality</li>
+                        <li><strong>Empathy:</strong> The ability to understand and relate to others' emotions</li>
+                        <li><strong>Reaching out:</strong> The willingness to seek help when needed</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Strategies to Build Resilience</h4>
+                    <ol>
+                        <li><strong>Build connections:</strong> Good relationships with family, friends, and others provide support during difficult times</li>
+                        <li><strong>Develop a growth mindset:</strong> View challenges as opportunities for personal growth</li>
+                        <li><strong>Accept change:</strong> Accept that change is a part of life and adapt accordingly</li>
+                        <li><strong>Set realistic goals:</strong> Do something regularly that enables you to move toward your goals</li>
+                        <li><strong>Take decisive actions:</strong> Act on adverse situations as much as you can, rather than detaching and wishing they would go away</li>
+                        <li><strong>Practice self-care:</strong> Pay attention to your own needs and feelings</li>
+                        <li><strong>Maintain perspective:</strong> Consider the stressful situation in a broader context and keep a long-term perspective</li>
+                        <li><strong>Cultivate hope:</strong> Visualize what you want rather than worrying about what you fear</li>
+                    </ol>
+                    
+                    <p class="mt-4">Remember that building resilience is an ongoing process. It takes time, intentionality, and sometimes professional support.</p>
+                `,
+                author: 'Dr. Lisa Rodriguez, Resilience Researcher',
+                fullArticleUrl: '#'
+            }
+        };
+        
+        // Add event listeners to all Read More buttons
+        document.querySelectorAll('.article-card .btn-outline-primary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get article card and extract info
+                const card = this.closest('.article-card');
+                const title = card.querySelector('.card-title').textContent;
+                const category = card.querySelector('.badge').textContent.toLowerCase();
+                const articleId = generateArticleId(title);
+                
+                // Set modal title
+                modalTitle.textContent = title;
+                
+                // Show loading state
+                modalContent.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading article content...</p>
+                    </div>
+                `;
+                
+                // Show modal
+                articleModal.show();
+                
+                // Simulate loading delay (in a real app, this would be an AJAX call to fetch content)
+                setTimeout(() => {
+                    if (articleData[articleId]) {
+                        modalContent.innerHTML = articleData[articleId].content;
+                        modalAuthor.textContent = articleData[articleId].author;
+                        fullArticleLink.href = articleData[articleId].fullArticleUrl;
+                    } else {
+                        // Fallback for articles without predefined content
+                        modalContent.innerHTML = `
+                            <div class="alert alert-info">
+                                <h4>Article Preview</h4>
+                                <p>This is a preview of the article "${title}". In a production environment, this content would be loaded from a database or API.</p>
+                                <p>The full article would contain more detailed information about ${title.toLowerCase()}, including research findings, practical advice, and resources for further reading.</p>
+                            </div>
+                            <p>Category: ${category}</p>
+                            <p>This is placeholder content for demonstration purposes. In a real application, complete article content would be displayed here.</p>
+                        `;
+                        modalAuthor.textContent = "Sample Author";
+                        fullArticleLink.href = "#";
+                    }
+                }, 800);
+            });
+        });
+        
+        // Handle featured article "Read Full Article" button
+        document.querySelector('.featured-article .btn-primary').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const title = "The Science of Mindfulness: How Being Present Can Transform Your Mental Health";
+            modalTitle.textContent = title;
+            
+            // Show loading state
+            modalContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading article content...</p>
+                </div>
+            `;
+            
+            // Show modal
+            articleModal.show();
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                // Featured article content
+                modalContent.innerHTML = `
+                    <img src="https://images.unsplash.com/photo-1553708881-112abc53fe54?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="img-fluid rounded mb-4" alt="Mindfulness">
+                    <p class="lead">Discover how mindfulness practices can rewire your brain, reduce anxiety, and improve overall well-being through simple daily practices that anyone can incorporate into their routine.</p>
+                    
+                    <h4 class="mt-4">The Neuroscience of Mindfulness</h4>
+                    <p>Recent neuroscience research has shown that mindfulness meditation can actually change the structure of the brain, increasing gray matter in regions associated with learning, memory, and emotional regulation. Studies using functional MRI scans have revealed that regular mindfulness practice can:</p>
+                    <ul>
+                        <li>Strengthen the prefrontal cortex, which is responsible for decision-making and self-regulation</li>
+                        <li>Reduce activity in the amygdala, the brain's "fight or flight" center</li>
+                        <li>Improve connectivity between different brain regions, enhancing overall cognitive function</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Effects on Mental Health</h4>
+                    <p>The clinical applications of mindfulness practices have been extensively studied, with research showing significant benefits for:</p>
+                    <ul>
+                        <li><strong>Anxiety Disorders:</strong> Regular mindfulness reduces symptoms and prevents relapse</li>
+                        <li><strong>Depression:</strong> Mindfulness-Based Cognitive Therapy (MBCT) can be as effective as medication for preventing depression relapse</li>
+                        <li><strong>Stress Reduction:</strong> Mindfulness techniques lower cortisol levels and improve stress resilience</li>
+                        <li><strong>PTSD:</strong> Mindfulness helps individuals process traumatic memories with less emotional reactivity</li>
+                        <li><strong>Substance Use Disorders:</strong> Mindfulness increases awareness of triggers and reduces impulsive behavior</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Simple Daily Practices</h4>
+                    <p>You don't need to meditate for hours to experience the benefits of mindfulness. Here are some simple practices to incorporate into your daily routine:</p>
+                    <ol>
+                        <li><strong>Mindful breathing:</strong> Take 5 minutes each day to focus solely on your breath</li>
+                        <li><strong>Mindful walking:</strong> Pay attention to the sensations in your feet and legs as you walk</li>
+                        <li><strong>Mindful eating:</strong> Fully experience the tastes, textures, and smells of your food</li>
+                        <li><strong>Body scan meditation:</strong> Progressively focus on each part of your body from toe to head</li>
+                        <li><strong>Mindful listening:</strong> Give your full attention when others are speaking without planning your response</li>
+                    </ol>
+                    
+                    <p class="mt-4">By incorporating these practices into your life, you can experience the transformative effects of mindfulness on your mental health and overall well-being.</p>
+                `;
+                modalAuthor.textContent = "Dr. Sarah Johnson, Neuroscientist";
+                fullArticleLink.href = "#";
+            }, 800);
+        });
+        
+        // Helper function to generate article ID from title
+        function generateArticleId(title) {
+            const idMap = {
+                '5 Mindfulness Exercises to Reduce Anxiety in Minutes': 'mindfulness-exercises',
+                'The Connection Between Sleep Quality and Mental Health': 'sleep-mental-health',
+                'Building Resilience: How to Thrive Under Pressure': 'building-resilience'
+            };
+            
+            return idMap[title] || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        }
+    });
+</script>
+{% endblock %} 
